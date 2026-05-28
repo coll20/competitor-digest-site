@@ -20,12 +20,10 @@
       a.href = idx === 0 && !currentDate ? '/' : `/archive/${it.date}.html`;
       const dateEl = document.createElement('span');
       dateEl.className = 'date';
-      dateEl.textContent = it.date + (idx === 0 ? ' (최초)' : '');
-      const subEl = document.createElement('span');
-      subEl.className = 'sub';
-      subEl.textContent = it.headline || '';
+      const cleanDate = it.date.replace(/-rerun$/, '');
+      const label = it.label ? ` (${it.label})` : '';
+      dateEl.textContent = cleanDate + label;
       a.appendChild(dateEl);
-      a.appendChild(subEl);
       li.appendChild(a);
       ul.appendChild(li);
     });
