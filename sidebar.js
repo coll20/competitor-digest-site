@@ -20,7 +20,7 @@
       a.href = idx === 0 && !currentDate ? '/' : `/archive/${it.date}.html`;
       const dateEl = document.createElement('span');
       dateEl.className = 'date';
-      dateEl.textContent = it.date + (idx === 0 ? ' (최신)' : '');
+      dateEl.textContent = it.date + (idx === 0 ? ' (최초)' : '');
       const subEl = document.createElement('span');
       subEl.className = 'sub';
       subEl.textContent = it.headline || '';
