@@ -24,5 +24,6 @@ jobs:
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_EXTRA_RECIPIENTS: ${{ secrets.GMAIL_EXTRA_RECIPIENTS }}
           ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
         run: python .github/scripts/notify.py

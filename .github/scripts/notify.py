@@ -99,15 +99,16 @@ def update_github_secret(repo, secret_name, value, admin_pat):
         return r.status  # 201 (created) or 204 (updated)
 
 
-def send_gmail(user, password, subject, html_body):
+def send_gmail(user, password, subject, html_body, bcc=None):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = f"Competitor Digest <{user}>"
     msg["To"] = user
     msg.attach(MIMEText(html_body, "html", "utf-8"))
+    recipients = [user] + (bcc or [])
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as server:
         server.login(user, password)
-        server.send_message(msg)
+        server.sendmail(user, recipients, msg.as_string())
 
 
 def main():
@@ -115,6 +116,8 @@ def main():
     refresh_token = os.environ["KAKAO_REFRESH_TOKEN"]
     gmail_user = os.environ["GMAIL_USER"]
     gmail_password = os.environ["GMAIL_APP_PASSWORD"].replace(" ", "")
+    bcc_raw = os.environ.get("GMAIL_EXTRA_RECIPIENTS", "").strip()
+    bcc_list = [e.strip() for e in bcc_raw.split(",") if e.strip()] if bcc_raw else []
 
     print(f"[1/4] Fetching manifest: {MANIFEST_URL}")
     manifest = http_get_json(f"{MANIFEST_URL}?t={int(time.time())}")
@@ -174,8 +177,9 @@ def main():
     print("      ✓ KakaoTalk sent")
 
     print("[4/4] Sending Gmail...")
-    send_gmail(gmail_user, gmail_password, gmail_subject, gmail_html)
-    print(f"      ✓ Gmail sent to {gmail_user}")
+    send_gmail(gmail_user, gmail_password, gmail_subject, gmail_html, bcc=bcc_list)
+    bcc_summary = f" + {len(bcc_list)} BCC ({', '.join(bcc_list)})" if bcc_list else ""
+    print(f"      ✓ Gmail sent to {gmail_user}{bcc_summary}")
 
     print(f"\n✅ Notification complete for {date}")
 
