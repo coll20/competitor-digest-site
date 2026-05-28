@@ -3,6 +3,8 @@
 
 Required env vars:
   KAKAO_REST_API_KEY, KAKAO_REFRESH_TOKEN, GMAIL_USER, GMAIL_APP_PASSWORD
+Optional:
+  ADMIN_PAT  — if set, auto-updates KAKAO_REFRESH_TOKEN secret when Kakao rotates it
 """
 import json
 import os
@@ -16,6 +18,7 @@ from email.mime.text import MIMEText
 
 SITE_URL = "https://competitor-digest-jay-1779945070.netlify.app"
 MANIFEST_URL = f"{SITE_URL}/archive/manifest.json"
+REPO = "coll20/competitor-digest-site"
 
 
 def http_post(url, form, headers=None):
@@ -69,6 +72,33 @@ def send_kakao(access_token, text, web_url):
         raise RuntimeError(f"Kakao send failed (status={status}): {body}")
 
 
+def update_github_secret(repo, secret_name, value, admin_pat):
+    """Encrypt and PUT a GitHub Actions secret via REST API."""
+    import nacl.encoding
+    import nacl.public
+
+    headers = {"Authorization": f"Bearer {admin_pat}", "Accept": "application/vnd.github+json"}
+    # Fetch repo public key
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{repo}/actions/secrets/public-key", headers=headers
+    )
+    with urllib.request.urlopen(req) as r:
+        key_info = json.loads(r.read().decode())
+    pubkey = nacl.public.PublicKey(key_info["key"].encode(), nacl.encoding.Base64Encoder())
+    encrypted = nacl.public.SealedBox(pubkey).encrypt(value.encode())
+    encrypted_b64 = nacl.encoding.Base64Encoder.encode(encrypted).decode()
+    # PUT secret
+    body = json.dumps({"encrypted_value": encrypted_b64, "key_id": key_info["key_id"]}).encode()
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{repo}/actions/secrets/{secret_name}",
+        data=body,
+        headers={**headers, "Content-Type": "application/json"},
+        method="PUT",
+    )
+    with urllib.request.urlopen(req) as r:
+        return r.status  # 201 (created) or 204 (updated)
+
+
 def send_gmail(user, password, subject, html_body):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -99,11 +129,23 @@ def main():
     print("[2/4] Refreshing Kakao access token...")
     access_token, new_refresh = refresh_kakao(rest_api_key, refresh_token)
     if new_refresh and new_refresh != refresh_token:
-        print(
-            "::warning::Kakao issued a NEW refresh_token. "
-            "Update GH secret KAKAO_REFRESH_TOKEN with this value to keep auto-refresh alive:\n"
-            f"{new_refresh}"
-        )
+        admin_pat = os.environ.get("ADMIN_PAT")
+        if admin_pat:
+            try:
+                status = update_github_secret(REPO, "KAKAO_REFRESH_TOKEN", new_refresh, admin_pat)
+                print(f"      ✓ Kakao rotated refresh_token — auto-updated GH secret (HTTP {status})")
+            except Exception as e:
+                print(
+                    f"::error::Kakao rotated refresh_token but auto-update FAILED: {e}\n"
+                    f"Manually update GH secret KAKAO_REFRESH_TOKEN with:\n{new_refresh}"
+                )
+        else:
+            print(
+                "::warning::Kakao rotated refresh_token; ADMIN_PAT not set. "
+                f"Manually update GH secret KAKAO_REFRESH_TOKEN with:\n{new_refresh}"
+            )
+    else:
+        print("      (refresh_token still valid, no rotation needed)")
 
     kakao_text = f"📊 {date} 경쟁사 다이제스트\n\n{headline}\n\n🔗 {SITE_URL}"
     gmail_subject = f"[경쟁사 다이제스트] {date} — {headline[:60]}"
