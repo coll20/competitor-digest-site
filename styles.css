@@ -197,6 +197,19 @@ h1 {
 }
 .ceo-body .title { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
 .ceo-body .desc { color: var(--text-dim); font-size: 14px; }
+
+/* Inline article links on body titles (CEO brief, company cards, recap) */
+.ceo-body .title a,
+.card-title a,
+a.recap-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.ceo-body .title a:hover,
+.card-title a:hover,
+a.recap-link:hover { color: var(--accent-2); }
 .urgency {
   align-self: center;
   font-size: 11px;
