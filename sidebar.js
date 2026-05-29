@@ -17,10 +17,10 @@
       const li = document.createElement('li');
       if (it.date === currentDate) li.className = 'current';
       const a = document.createElement('a');
-      a.href = idx === 0 && !currentDate ? '/' : `/archive/${it.date}.html`;
+      a.href = idx === 0 && !currentDate && !it.label ? '/' : `/archive/${it.date}.html`;
       const dateEl = document.createElement('span');
       dateEl.className = 'date';
-      const cleanDate = it.date.replace(/-rerun$/, '');
+      const cleanDate = (it.date.match(/^\d{4}-\d{2}-\d{2}/) || [it.date])[0];
       const label = it.label ? ` (${it.label})` : '';
       dateEl.textContent = cleanDate + label;
       a.appendChild(dateEl);
