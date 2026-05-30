@@ -279,6 +279,29 @@ section.company { margin-bottom: 48px; }
 .date-chip.fresh { color: var(--opportunity); border-color: var(--opportunity); }
 .date-chip.near { color: var(--midhigh); border-color: var(--midhigh); }
 
+/* Media source labels (shown on every item: CEO brief, cards, recap) */
+.card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.source-chip {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-2);
+  padding: 4px 10px;
+  background: rgba(183, 148, 255, 0.10);
+  border: 1px solid rgba(183, 148, 255, 0.35);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.source-chip::before { content: "📰 "; }
+.src-tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-2);
+  margin-left: 6px;
+  white-space: nowrap;
+}
+.src-tag::before { content: "· 출처 "; color: var(--text-dim); font-weight: 400; }
+
 .field { margin-top: 10px; font-size: 14.5px; }
 .field-label {
   display: inline-block;
