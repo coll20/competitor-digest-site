@@ -43,7 +43,7 @@
 - **루틴 ID**: `trig_01HHXYVgdgB7HToq4SrFaPZk`
 - **cron**: `0 22 * * *` (UTC) = **07:00 KST**
 - **model**: `claude-sonnet-4-6`
-- **동작 흐름**: (STEP 4) 5개사 멀티채널 웹 리서치 → (STEP 5) 전날 아카이브 대비 중복제거 → (STEP 6~8) `index.html` + `archive/<today>.html` 작성 → (STEP 9) `manifest.json` 갱신 → (STEP 10) `git push`.
+- **동작 흐름**: (STEP 4) 5개사 멀티채널 웹 리서치 → (STEP 5) 전날 아카이브 대비 중복제거 → (STEP 6~8) `index.html` + `archive/<today>.html` 작성(출처 매체 표기 포함) → (STEP 9) `manifest.json` 갱신 → (STEP 9.5) **배포 직전 모든 기사 URL 전수 검증**(HTTP 200 + 실제 기사 본문 + 제목 키워드 일치, 실패 항목 제거) → (STEP 10) `git push`.
 - **STEP 4 검색 채널 (2026-05-30 확장)**: 회사당 후보 기사를 **폭넓게(≥5개 목표, 상한 없음)** 수집한다. 첫 히트에서 멈추지 않는다.
   - (A) **WebSearch** — 회사당 4~6개 다양한 쿼리(정식명+약칭+영문명+주제어 조합).
   - (B) **네이버 포털 뉴스 검색 — 필수** — `https://search.naver.com/search.naver?where=news&query={검색어}&sort=1&pd=4` (최신순/최근 1개월). 회사당 최소 2개 검색어(정식명+약칭).
@@ -74,6 +74,12 @@
   - CEO/카드: 제목 텍스트를 `<a href target="_blank" rel="noopener">`로 감싼다 (`(날짜)` span은 링크 밖).
   - recap: 사건 요약 문구를 `<a class="recap-link" ...>`로 감싼다.
   - 스타일은 `styles.css`에 정의됨(`.ceo-body .title a`, `.card-title a`, `a.recap-link`). URL 없으면 링크 생략(날조 금지).
+- **출처 매체 표기 (필수, 2026-05-30)**: 모든 항목에 언론사/매체명을 노출한다.
+  - 카드: 제목 위 `card-meta`에 `<span class="source-chip">{매체명}</span>` + `date-chip`.
+  - CEO TOP-3: 제목 뒤 `<span class="src-tag">{매체명}</span>`.
+  - recap: 끝 span에 `({매체명} · {날짜} 최초 보도)`.
+  - Sources: `{기사 제목} — {매체명}` 형식. 관련 스타일(`.card-meta`/`.source-chip`/`.src-tag`)은 `styles.css`에 정의됨.
+- **링크 무결성 (필수, 2026-05-30)**: 모든 링크는 개별 기사의 완전한 실제 URL만. 검색결과 페이지(`search.naver.com`)·목록 페이지(`korearatings.com/cms` 등 기사 본문 아님)·잘린/플레이스홀더 URL·날조 URL 금지. 배포 직전 전수 검증(아래 STEP 9.5).
 
 ## 로컬 클론 / 동기화
 - 이 저장소는 로컬 `/home/jaykwon/projects/27th-agent`에 클론돼 있다 (origin = `coll20/competitor-digest-site`).
@@ -89,3 +95,7 @@
   - **테스트 실행 검증** — 새 프롬프트로 1회 수동 실행(`RemoteTrigger run`). 결과: 전 회사 빈칸이던 5/30이 KCB(카카오페이 스코어 주금공 도입)·이크레더블(한기평 IFRS18 리포트) 카드로 채워지고 Sources 12개, 가짜/검색페이지 링크 0개 확인. → 정식 5/30 다이제스트로 채택.
   - **GitHub PAT 로테이션** — 노출 우려로 토큰 교체(신규 만료 2027-05-29). 교체 위치 2곳: ① 원격 루틴 프롬프트, ② 로컬 `.claude/settings.local.json`. 새 토큰 권한 = **Contents R/W 만**(Secrets 권한 불필요 — Secret 갱신은 별도 `ADMIN_PAT` 담당). **기존(노출) 토큰은 아직 revoke 안 함 — 사용자가 추후 폐기 예정.**
   - 로컬 저장소 클론 + `.claude/` gitignore 등록.
+  - **출처 매체 전 항목 표기** — 카드 `source-chip`, CEO `src-tag`, recap·Sources 매체명. `styles.css`에 `.card-meta`/`.source-chip`/`.src-tag` 스타일 추가.
+  - **링크 무결성 버그픽스** — 테스트 실행분에서 이크레더블 "한국기업평가 IFRS18 이슈리포트" 카드가 실제 기사가 아니라 `korearatings.com/cms` **목록 페이지**를 링크하고 있었음(사용자 발견). 해당 항목 제거. 추가로 가짜 NICE 기사(fntimes 빈 페이지)·무관 기사(etnews CJ ENM)·깨진 링크(venturesquare 410·wowtale 403)도 제거.
+  - **배포 직전 URL 전수 검증 도입** — 본문·Sources의 모든 URL을 HTTP 200 + 실제 기사 본문 + 제목 키워드 일치로 검증한 뒤에만 배포. 5/30분 9개 URL 전수 통과 확인 후 배포.
+  - **루틴 프롬프트에 영구 반영** — STEP 8.5에 출처 매체 표기 규칙 추가, STEP 9.5(링크 검증) 신설, QUALITY BAR 갱신. (※ 이번 세션 RemoteTrigger 결과 표시 글리치로 적용 후 시각적 재확인은 다음 기회에 권장.)
