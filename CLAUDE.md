@@ -98,4 +98,4 @@
   - **출처 매체 전 항목 표기** — 카드 `source-chip`, CEO `src-tag`, recap·Sources 매체명. `styles.css`에 `.card-meta`/`.source-chip`/`.src-tag` 스타일 추가.
   - **링크 무결성 버그픽스** — 테스트 실행분에서 이크레더블 "한국기업평가 IFRS18 이슈리포트" 카드가 실제 기사가 아니라 `korearatings.com/cms` **목록 페이지**를 링크하고 있었음(사용자 발견). 해당 항목 제거. 추가로 가짜 NICE 기사(fntimes 빈 페이지)·무관 기사(etnews CJ ENM)·깨진 링크(venturesquare 410·wowtale 403)도 제거.
   - **배포 직전 URL 전수 검증 도입** — 본문·Sources의 모든 URL을 HTTP 200 + 실제 기사 본문 + 제목 키워드 일치로 검증한 뒤에만 배포. 5/30분 9개 URL 전수 통과 확인 후 배포.
-  - **루틴 프롬프트에 영구 반영** — STEP 8.5에 출처 매체 표기 규칙 추가, STEP 9.5(링크 검증) 신설, QUALITY BAR 갱신. (※ 이번 세션 RemoteTrigger 결과 표시 글리치로 적용 후 시각적 재확인은 다음 기회에 권장.)
+  - **루틴 프롬프트에 영구 반영 완료** — STEP 4(B)에 네이버 검색페이지 URL 금지 규칙, STEP 6/7에 `source_name` 필드, STEP 8.5에 출처 매체 표기(src-tag/source-chip) 규칙, STEP 9.5(배포 직전 링크 전수 검증) 신설, STEP 11 Link check 리포트, QUALITY BAR 갱신. RemoteTrigger update 200 + 응답 본문으로 반영 확인(updated_at 2026-05-30 13:09 UTC). 다음 07:00 KST 자동 실행부터 적용.
