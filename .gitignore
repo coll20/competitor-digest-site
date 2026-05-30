@@ -2,3 +2,6 @@
 .DS_Store
 node_modules/
 *.log
+
+# Claude Code local settings (contains secrets — never commit)
+.claude/
