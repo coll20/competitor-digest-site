@@ -53,6 +53,7 @@
 - recap 표시 상한: **최대 15개** (2026-05-30, 기존 10개에서 상향).
 - **핵심**: 루틴은 **전날 아카이브를 구조 템플릿**으로 삼는다 (`Keep ALL structure. Replace ONLY content`). 따라서 오늘 아카이브의 구조를 바꾸면 다음날 생성분에도 자연스럽게 전파된다.
 - **프롬프트 수정 방법** (다른 컴퓨터에서도): Claude Code에서 `/schedule` 스킬 → `RemoteTrigger`(action `get`/`update`)로 이 루틴의 `job_config.ccr.events[].data.message.content`를 편집. 또는 웹 UI: https://claude.ai/code/routines
+  - ⚠️ **update body 스키마 주의**: `events[]` 원소는 `{"data":{"message":{"role":"user","content":"..."}, ...}}` 형식이어야 한다. `event_type` 필드를 넣으면 v2 변환 에러(`unknown field "event_type"`)로 400 거부됨. get으로 받은 구조를 그대로 두고 `content`만 교체할 것. (간헐적으로 첫 update가 400 날 수 있으니 동일 형식으로 1회 재시도.)
 - ⚠️ **보안**: 루틴 프롬프트에 push용 GitHub PAT가 평문으로 들어 있다(2곳: INFRA 안내 + STEP 1 clone 명령). **이 토큰은 이 저장소에 절대 커밋하지 말 것.** 노출이 우려되면 rotate 후 루틴 프롬프트만 갱신.
 
 ## 아카이브 네이밍 컨벤션
