@@ -358,6 +358,81 @@ footer.page-footer {
 }
 footer.page-footer a { color: var(--accent); }
 
+/* 🇰🇷 한글로 읽기 버튼 (카드/CEO 하단) */
+.card-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.ko-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: rgba(45, 212, 191, 0.08);
+  transition: background .15s, color .15s, border-color .15s;
+}
+.ko-btn:hover { background: var(--accent); color: #04121a; }
+.ko-btn.ghost { color: var(--text-dim); border-color: var(--border); background: transparent; }
+.ko-btn.ghost:hover { color: var(--accent); border-color: var(--accent); background: rgba(45,212,191,0.08); }
+
+/* 국내 보조 보도 칩 (글로벌 1차 소스 + 국내 보조) */
+.kr-src {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--opportunity);
+  padding: 4px 10px;
+  background: rgba(74, 222, 128, 0.10);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  border-radius: 999px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.kr-src::before { content: "🇰🇷 "; }
+.kr-src:hover { background: rgba(74, 222, 128, 0.2); }
+
+/* 한글 상세 페이지 (archive/<date>-ko.html) */
+.ko-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px 96px; }
+.eyebrow.ko-eyebrow { color: var(--opportunity); border-color: var(--opportunity); }
+.ko-backlinks { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+.ko-entry {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 18px;
+  scroll-margin-top: 20px;
+}
+.ko-entry:target {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.25);
+}
+.ko-entry-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.ko-orig {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent-2);
+  text-decoration: none;
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid rgba(129, 140, 248, 0.35);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.ko-orig:hover { background: rgba(129, 140, 248, 0.12); }
+.ko-title { font-size: 18px; font-weight: 700; line-height: 1.4; margin-bottom: 12px; }
+.ko-body { font-size: 15px; color: var(--text); margin-bottom: 12px; }
+.ko-body p { margin-bottom: 10px; }
+.ko-body p:last-child { margin-bottom: 0; }
+.ko-body strong { color: var(--text); font-weight: 700; }
+
 /* Mobile */
 .sidebar-toggle {
   display: none;
@@ -386,4 +461,7 @@ footer.page-footer a { color: var(--accent); }
   .ceo-num { width: 32px; height: 32px; font-size: 14px; }
   .urgency { grid-column: 2; justify-self: start; margin-top: 6px; }
   .card { padding: 18px; }
+  .ko-wrap { padding: 16px 16px 64px; }
+  .ko-entry { padding: 18px; }
+  .ko-orig { margin-left: 0; }
 }
