@@ -100,13 +100,18 @@
   - 핵심 차별점: **글로벌 동향 우선**(영문 1차 소스), 모든 항목에 **출처 매체+인라인 링크+💡 테크핀 연관 인사이트**, finance 영역 최우선.
   - 테크핀 자산(월단위 세무·상거래 데이터, CPS 491, GNN 부도예측, EWS, D-Pay, AI 경영진단, 사기탐지, 은행 CSS 납품)에 동향을 연결하는 인사이트가 핵심 가치.
 - **dedup·링크검증**: 경쟁사 루틴과 동일하게 전날 AI 아카이브 대비 NEW/ALREADY_COVERED 분류 → recap, 그리고 배포 직전 STEP 9.5 전 URL 검증(HTTP 200 + 실제 기사 본문 + 키워드 일치, 검색·목록 페이지/깨진 링크 제거).
+- **한글 상세 + 🇰🇷 한글로 읽기 (2026-06-02)**: 각 카드/CEO에 `🇰🇷 한글로 읽기` 버튼 → `ai/archive/<date>-ko.html`(각 항목 6~10문장 **자체 작성 한글 상세본**, 원문 전문 번역 아님=저작권 안전 + 항목별 `원문 보기` 링크). 영문 1차=primary, 같은 사건의 **검증된** 국내 한글 보도가 있으면 `card-meta`에 `🇰🇷 국내 보도`(`.kr-src`) 보조 칩. 앵커 규칙 area+순번(frontier-1…). 스타일 `.ko-wrap`/`.ko-entry`/`.ko-btn`/`.kr-src`는 `ai/styles.css`. 루틴 프롬프트에 STEP 4(국내보조·blog금지)·6(ko_detail_ko·source_url_kr·anchor_id)·8.5(버튼/칩)·**8.6(한글 페이지 생성)**·9.5(국내URL·앵커 검증) 영구 반영. ⚠️ ko 페이지는 manifest 미포함(사이드바 비표시).
 - **크로스링크**: 경쟁사 페이지 사이드바에 `.sidebar-switch`로 `/ai`행, AI 페이지 사이드바에 `/`행 링크 상호 연결.
 - **알림 통합**: `notify.py`가 두 manifest(`/archive/manifest.json` + `/ai/archive/manifest.json`)를 모두 읽어 **1통**에 두 섹션(경쟁사 + AI)으로 카카오톡·Gmail 발송. AI manifest 없으면 경쟁사만 발송(graceful).
 - **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ create/update 스키마: `session_context`는 `job_config.ccr` **안에** 위치(model/allowed_tools 포함), `events[].data`에 `uuid/session_id/type/parent_tool_use_id` 필요.
 - ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사 루틴과 동일 토큰). 이 repo에 커밋 금지.
 
 ## 작업 로그
-- **2026-06-02**: **글로벌 AI 기술 동향 다이제스트(`/ai`) 추가** — 5개 영역 카드 + 테크핀 인사이트 섹션, 자체 테마 CSS/sidebar, 창간호 시드(12개 항목 전수 링크검증), 생성 루틴 `trig_01FJQEYTS9m2b9cB3a2qp14J`(06:00 KST), `notify.py`를 두 다이제스트 통합 1통 발송으로 확장, 양 사이트 크로스링크.
+- **2026-06-02**:
+  - **글로벌 AI 기술 동향 다이제스트(`/ai`) 추가** — 5개 영역 카드 + 테크핀 인사이트 섹션, 자체 테마 CSS/sidebar, 창간호 시드(12개 항목 전수 링크검증), 생성 루틴 `trig_01FJQEYTS9m2b9cB3a2qp14J`(06:00 KST), `notify.py`를 두 다이제스트 통합 1통 발송으로 확장, 양 사이트 크로스링크.
+  - **AI 한글 상세 기능** — `🇰🇷 한글로 읽기` 버튼 + `ai/archive/<date>-ko.html`(자체 작성 한글 상세본) + 글로벌 1차/국내 보조 링크(`🇰🇷 국내 보도`). AI 루틴에 영구 반영(STEP 4·6·8.5·8.6·9.5). 시드 국내 보도칩 2건(앤트로픽 금융에이전트=ZDNet, EU AI법=디지털투데이).
+  - **경쟁사 루틴 STEP 4 검색 개편(rev2)** — 사용자 피드백(기관명 중심으로 더 많이)으로 시작. 1차 시도(rev1 "이름만 검색")가 **브랜드명 단독 WebSearch=회사 홈페이지·주식·채용 페이지만 반환**임을 수동 테스트로 발견(루틴이 또 전 회사 "신규 없음") → **rev2**로 정정: "회사명+뉴스성 키워드 + 네이버/구글뉴스(뉴스 인덱스)" 발견 + **2차 언급 기사**(타기관 헤드라인 속 경쟁사: 예 케이뱅크+NICE 공동출시) 포착 + blog/cafe 인용 금지 + 가벼운 관련성 필터. 계기: NICE 산학연구포럼 기사(ddaily/newsfreezone, 5/29)가 rev1에서 누락된 케이스.
+  - **운영 gotcha 발견** — ① 수동 `RemoteTrigger run`은 상태/로그 조회 불가(`get`의 `last_fired_at`은 cron 정기실행만 갱신; 수동 run은 push해도 안 바뀜) → 결과 확인은 GitHub 원격 HEAD 폴링(새 "Daily digest" 커밋). "no changes"면 push 없음. ② `blog.naver.com`/`cafe.naver.com`은 WebFetch 불가 → 검증 불가 → 인용 금지.
 - **2026-05-28**: 사이트 v1 부트스트랩, Netlify 배포 워크플로, 매일 알림(카카오+Gmail) 추가.
 - **2026-05-29**: 본문 항목에 원문 기사 **인라인 링크** 추가(CEO·recap). 영구 규칙은 생성 루틴 프롬프트의 새 `STEP 8.5 · INLINE SOURCE LINKS`에 반영. 테스트 아카이브 `2026-05-29 (밤 버전)` 추가. `sidebar.js` 날짜 표시 정규화 및 `label` 변형 링크 처리.
 - **2026-05-30**:
