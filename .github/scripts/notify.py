@@ -18,6 +18,8 @@ from email.mime.text import MIMEText
 
 SITE_URL = "https://competitor-digest-jay-1779945070.netlify.app"
 MANIFEST_URL = f"{SITE_URL}/archive/manifest.json"
+AI_URL = f"{SITE_URL}/ai/"
+AI_MANIFEST_URL = f"{SITE_URL}/ai/archive/manifest.json"
 REPO = "coll20/competitor-digest-site"
 
 
@@ -119,7 +121,7 @@ def main():
     bcc_raw = os.environ.get("GMAIL_EXTRA_RECIPIENTS", "").strip()
     bcc_list = [e.strip() for e in bcc_raw.split(",") if e.strip()] if bcc_raw else []
 
-    print(f"[1/4] Fetching manifest: {MANIFEST_URL}")
+    print(f"[1/4] Fetching competitor manifest: {MANIFEST_URL}")
     manifest = http_get_json(f"{MANIFEST_URL}?t={int(time.time())}")
     if not manifest:
         raise RuntimeError("Manifest is empty")
@@ -127,7 +129,23 @@ def main():
     date = latest["date"]
     title = latest.get("title", f"경쟁사 다이제스트 — {date}")
     headline = latest.get("headline", "(헤드라인 없음)")
-    print(f"      latest: date={date}  headline={headline}")
+    print(f"      competitor latest: date={date}  headline={headline}")
+
+    # AI digest manifest is optional — degrade gracefully if missing/empty.
+    ai = None
+    try:
+        ai_manifest = http_get_json(f"{AI_MANIFEST_URL}?t={int(time.time())}")
+        if ai_manifest:
+            ai_latest = ai_manifest[0]
+            ai = {
+                "date": ai_latest["date"],
+                "headline": ai_latest.get("headline", "(헤드라인 없음)"),
+            }
+            print(f"      AI latest: date={ai['date']}  headline={ai['headline']}")
+        else:
+            print("      AI manifest empty — skipping AI section")
+    except Exception as e:
+        print(f"::warning::AI manifest fetch failed ({e}) — sending competitor-only notification")
 
     print("[2/4] Refreshing Kakao access token...")
     access_token, new_refresh = refresh_kakao(rest_api_key, refresh_token)
@@ -150,31 +168,58 @@ def main():
     else:
         print("      (refresh_token still valid, no rotation needed)")
 
+    # ---- Build KakaoTalk text (one message, two sections) ----
     kakao_text = f"📊 {date} 경쟁사 다이제스트\n\n{headline}\n\n🔗 {SITE_URL}"
-    gmail_subject = f"[경쟁사 다이제스트] {date} — {headline[:60]}"
+    if ai:
+        kakao_text += (
+            f"\n\n────────────\n🤖 {ai['date']} 글로벌 AI 기술 동향\n\n"
+            f"{ai['headline']}\n\n🔗 {AI_URL}"
+        )
+
+    # ---- Build Gmail (one mail, two sections) ----
+    if ai:
+        gmail_subject = f"[데일리 다이제스트] {date} 경쟁사 + AI 기술 동향"
+    else:
+        gmail_subject = f"[경쟁사 다이제스트] {date} — {headline[:60]}"
+
+    ai_section = ""
+    if ai:
+        ai_section = f"""
+    <p style="color:#888;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:28px 0 8px;">GLOBAL AI TECH INTEL</p>
+    <h2 style="margin:0 0 16px;font-size:22px;color:#0f766e;">🤖 {ai['date']} 글로벌 AI 기술 동향</h2>
+    <p style="font-size:16px;color:#333;background:#ecfdf5;padding:16px 20px;border-radius:8px;border-left:3px solid #2dd4bf;margin:0 0 20px;">
+      {ai['headline']}
+    </p>
+    <p style="margin:0 0 8px;">
+      <a href="{AI_URL}" style="display:inline-block;background:linear-gradient(135deg,#2dd4bf,#818cf8);color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
+        🔗 AI 다이제스트 열기
+      </a>
+    </p>"""
+
     gmail_html = f"""<!DOCTYPE html>
 <html><body style="font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;line-height:1.6;color:#222;background:#f5f5f7;margin:0;padding:24px;">
   <div style="max-width:560px;margin:0 auto;background:white;border-radius:12px;padding:32px;">
     <p style="color:#888;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 8px;">COMPETITIVE INTELLIGENCE</p>
-    <h2 style="margin:0 0 20px;font-size:22px;color:#1a1a2e;">📊 {date} 경쟁사 다이제스트</h2>
-    <p style="font-size:16px;color:#333;background:#f0f4ff;padding:16px 20px;border-radius:8px;border-left:3px solid #6ea8ff;margin:0 0 24px;">
+    <h2 style="margin:0 0 16px;font-size:22px;color:#1a1a2e;">📊 {date} 경쟁사 다이제스트</h2>
+    <p style="font-size:16px;color:#333;background:#f0f4ff;padding:16px 20px;border-radius:8px;border-left:3px solid #6ea8ff;margin:0 0 20px;">
       {headline}
     </p>
     <p style="margin:0;">
       <a href="{SITE_URL}" style="display:inline-block;background:linear-gradient(135deg,#6ea8ff,#b794ff);color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
-        🔗 다이제스트 전체 열기
+        🔗 경쟁사 다이제스트 열기
       </a>
-    </p>
+    </p>{ai_section}
     <p style="font-size:12px;color:#999;margin:32px 0 0;border-top:1px solid #eee;padding-top:16px;">
-      매일 KST 07:00 자동 수집 → 07:30 카카오톡·이메일 동시 발송<br>
-      <a href="{SITE_URL}" style="color:#6ea8ff;">{SITE_URL}</a>
+      매일 KST 자동 수집 → 카카오톡·이메일 동시 발송<br>
+      경쟁사: <a href="{SITE_URL}" style="color:#6ea8ff;">{SITE_URL}</a><br>
+      AI 동향: <a href="{AI_URL}" style="color:#2dd4bf;">{AI_URL}</a>
     </p>
   </div>
 </body></html>"""
 
     print("[3/4] Sending KakaoTalk...")
     send_kakao(access_token, kakao_text, SITE_URL)
-    print("      ✓ KakaoTalk sent")
+    print(f"      ✓ KakaoTalk sent ({'2 sections' if ai else 'competitor only'})")
 
     print("[4/4] Sending Gmail...")
     send_gmail(gmail_user, gmail_password, gmail_subject, gmail_html, bcc=bcc_list)

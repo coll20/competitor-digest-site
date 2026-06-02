@@ -2,6 +2,8 @@
 
 경쟁사 주간 동향 다이제스트 사이트. 한국 신용평가/기업데이터 5개사를 매일 추적하는 **정적 웹사이트**다. 콘텐츠는 사람이 아니라 **스케줄된 원격 Claude 루틴**이 매일 생성·커밋하고, GitHub Actions가 Netlify에 자동 배포한다.
 
+> **이 repo는 두 개의 다이제스트를 호스팅한다.** ① 루트(`/`) = 경쟁사 주간 동향(5개사), ② `/ai` = 글로벌 AI 기술 동향. 둘 다 같은 Netlify 사이트·deploy.yml·notify 인프라를 공유하며, 각자 별도의 생성 루틴을 가진다. 아래 문서는 주로 경쟁사 다이제스트 기준이며, AI 다이제스트 전용 내용은 **`## AI 기술 동향 다이제스트 (/ai)`** 섹션 참조.
+
 ## Live & Infra
 - **Live**: https://competitor-digest-jay-1779945070.netlify.app
 - **Repo**: https://github.com/coll20/competitor-digest-site (branch: `main`)
@@ -87,7 +89,24 @@
 - `.claude/`는 **`.gitignore`에 등록**돼 있다 — 로컬 `settings.local.json`에 PAT가 평문으로 있어 절대 커밋 금지.
 - 로컬에서 push: 토큰을 git config에 저장하지 않고 일회성으로만 사용 → `git -c credential.helper= push "https://x-access-token:<PAT>@github.com/coll20/competitor-digest-site.git" HEAD:main`.
 
+## AI 기술 동향 다이제스트 (/ai)
+글로벌 AI 기술 동향을 매일 정리하는 두 번째 다이제스트. 같은 repo·Netlify·deploy·notify 인프라 위에서 `/ai` 경로로 서빙된다.
+- **Live**: https://competitor-digest-jay-1779945070.netlify.app/ai/
+- **파일**: `ai/index.html`(최신), `ai/archive/<date>.html`(아카이브), `ai/archive/manifest.json`, `ai/styles.css`(틸/인디고 테마, 자체 완결형), `ai/sidebar.js`(`/ai/archive/manifest.json` fetch, `/ai/`로 링크).
+- **생성 루틴 ID**: `trig_01FJQEYTS9m2b9cB3a2qp14J` (이름: "Daily Global AI Tech Digest (테크핀 인사이트 포함)")
+  - **cron**: `0 21 * * *` (UTC) = **06:00 KST** — 경쟁사 루틴(07:00 KST)보다 1시간 먼저 실행해 07:30 알림 전 둘 다 준비됨. push는 `git pull --rebase` 후 수행(경쟁사 루틴과 충돌 방지).
+  - **model**: `claude-sonnet-4-6`, env `env_012Eb5mv4x1BeWNXF8NxBfz9` (경쟁사 루틴과 공유).
+- **콘텐츠 구조**: 🎯 오늘의 핵심 3(CEO 스타일) → **5개 고정 영역** 카드(🌐 frontier / 🔧 infra / 🧩 agents / 🏦 finance / 📜 policy) → 💡 **테크핀레이팅스 인사이트**(동향이 회사 자산에 주는 함의 4~5개 종합) → 📚 이번 주 누적(recap) → Sources.
+  - 핵심 차별점: **글로벌 동향 우선**(영문 1차 소스), 모든 항목에 **출처 매체+인라인 링크+💡 테크핀 연관 인사이트**, finance 영역 최우선.
+  - 테크핀 자산(월단위 세무·상거래 데이터, CPS 491, GNN 부도예측, EWS, D-Pay, AI 경영진단, 사기탐지, 은행 CSS 납품)에 동향을 연결하는 인사이트가 핵심 가치.
+- **dedup·링크검증**: 경쟁사 루틴과 동일하게 전날 AI 아카이브 대비 NEW/ALREADY_COVERED 분류 → recap, 그리고 배포 직전 STEP 9.5 전 URL 검증(HTTP 200 + 실제 기사 본문 + 키워드 일치, 검색·목록 페이지/깨진 링크 제거).
+- **크로스링크**: 경쟁사 페이지 사이드바에 `.sidebar-switch`로 `/ai`행, AI 페이지 사이드바에 `/`행 링크 상호 연결.
+- **알림 통합**: `notify.py`가 두 manifest(`/archive/manifest.json` + `/ai/archive/manifest.json`)를 모두 읽어 **1통**에 두 섹션(경쟁사 + AI)으로 카카오톡·Gmail 발송. AI manifest 없으면 경쟁사만 발송(graceful).
+- **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ create/update 스키마: `session_context`는 `job_config.ccr` **안에** 위치(model/allowed_tools 포함), `events[].data`에 `uuid/session_id/type/parent_tool_use_id` 필요.
+- ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사 루틴과 동일 토큰). 이 repo에 커밋 금지.
+
 ## 작업 로그
+- **2026-06-02**: **글로벌 AI 기술 동향 다이제스트(`/ai`) 추가** — 5개 영역 카드 + 테크핀 인사이트 섹션, 자체 테마 CSS/sidebar, 창간호 시드(12개 항목 전수 링크검증), 생성 루틴 `trig_01FJQEYTS9m2b9cB3a2qp14J`(06:00 KST), `notify.py`를 두 다이제스트 통합 1통 발송으로 확장, 양 사이트 크로스링크.
 - **2026-05-28**: 사이트 v1 부트스트랩, Netlify 배포 워크플로, 매일 알림(카카오+Gmail) 추가.
 - **2026-05-29**: 본문 항목에 원문 기사 **인라인 링크** 추가(CEO·recap). 영구 규칙은 생성 루틴 프롬프트의 새 `STEP 8.5 · INLINE SOURCE LINKS`에 반영. 테스트 아카이브 `2026-05-29 (밤 버전)` 추가. `sidebar.js` 날짜 표시 정규화 및 `label` 변형 링크 처리.
 - **2026-05-30**:
