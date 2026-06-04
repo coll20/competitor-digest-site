@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-06-05 글로벌 AI 다이제스트 — 한글 상세</title>
+<meta name="description" content="2026-06-05 글로벌 AI 기술 동향 다이제스트의 한글 상세본 — 구글 젬마 4 12B·OpenAI 코덱스 투자은행 플러그인·앤트로픽 파트너 서비스 트랙·핀테크 AI 신뢰 격차·연준 AI 경고·CNN vs 퍼플렉시티 저작권 소송을 테크핀레이팅스가 직접 한글로 정리">
+<link rel="stylesheet" href="/ai/styles.css">
+</head>
+<body data-page-date="2026-06-05">
+<div class="ko-wrap">
+
+  <header class="hero">
+    <span class="eyebrow ko-eyebrow">🇰🇷 한글 상세 · 2026-06-05</span>
+    <h1>글로벌 AI 다이제스트 — 한글 상세본</h1>
+    <p class="meta">영문 1차 소스 기사를 <strong>테크핀레이팅스가 직접 한글로 정리</strong>한 해설입니다. 각 항목 상단의 <strong>원문 보기</strong>로 1차 소스 전문을 확인할 수 있습니다.</p>
+    <div class="ko-backlinks">
+      <a class="ko-btn" href="/ai/archive/2026-06-05.html">← 카드 요약본으로</a>
+      <a class="ko-btn ghost" href="/ai/">최신 AI 다이제스트</a>
+    </div>
+  </header>
+
+  <div class="notice">
+    <strong>안내.</strong> 본 페이지의 한글 본문은 원문 기사의 전문 번역이 아니라, 핵심 내용을 <strong>테크핀레이팅스가 자체 작성한 한글 요약·해설</strong>입니다. 정확한 원문·인용은 각 항목의 <strong>원문 보기</strong> 링크(영문 1차 소스)를 참고하세요.
+  </div>
+
+  <!-- 프론티어 -->
+  <section class="company">
+    <div class="company-head">
+      <span class="company-num">🌐</span>
+      <h2 class="company-name">프론티어 모델 &amp; 빅테크</h2>
+    </div>
+
+    <article class="ko-entry" id="frontier-1">
+      <div class="ko-entry-head">
+        <span class="source-chip">The Decoder</span><span class="date-chip fresh">2026-06-04 🆕</span>
+        <a class="kr-src" href="https://www.thelec.kr/news/articleView.html?idxno=54627" target="_blank" rel="noopener">국내 보도 (디일렉)</a>
+        <a class="ko-orig" href="https://the-decoder.com/google-deepminds-gemma-4-12b-squeezes-multimodal-ai-onto-a-laptop-with-just-16-gb-of-ram/" target="_blank" rel="noopener">원문 보기 ↗</a>
+      </div>
+      <h3 class="ko-title">구글 딥마인드, 젬마 4 12B 오픈소스 공개 — 256K 컨텍스트·오디오·비디오 멀티모달, 16GB 노트북서 완전 구동·Apache 2.0</h3>
+      <div class="ko-body">
+        <p>구글 딥마인드가 2026년 6월 3~4일, <strong>젬마 4 12B(Gemma 4 12B)</strong>를 오픈소스로 공개했다. 약 119억(11.95B) 파라미터로, 이름처럼 12B급 규모이면서도 구글의 더 큰 젬마 4 26B 모델(MOE 구조) 수준에 근접하는 벤치마크 성능을 보여준다.</p>
+        <p>가장 주목할 기술적 특징은 <strong>인코더 없는 통합(Unified) 아키텍처</strong>다. 기존 멀티모달 AI 모델들이 텍스트·이미지·오디오를 처리하기 위해 각각의 전문 인코더를 별도로 두었던 것과 달리, 젬마 4 12B는 음성 파형(audio waveforms)과 시각 패치(visual patches)를 별도 모듈 없이 LLM 백본에 직접 입력한다. 이로 인해 지연 시간(latency)과 메모리 부담이 크게 줄어들었다.</p>
+        <p>컨텍스트 윈도우는 <strong>256,000 토큰</strong>으로, 긴 문서·대형 코드베이스·복잡한 에이전트 워크플로우를 한 번에 처리하기에 충분하다. 네이티브 에이전트 툴 사용(tool-use) 기능과 단계별 추론(step-by-step reasoning) 모드도 내장됐다.</p>
+        <p>핵심 가치는 <strong>구동 요구 사양</strong>에 있다. VRAM 16GB 이상의 일반 노트북(애플 맥북·최신 윈도우 PC)에서 완전히 로컬로 구동된다. 클라우드 API나 별도 서버 없이도 엔터프라이즈급 멀티모달 AI를 사용할 수 있다는 뜻이다. Hugging Face·Kaggle에서 모델 가중치를 다운로드할 수 있으며, vLLM·SGLang·MLX·llama.cpp 등 산업 표준 배포 프레임워크와 즉시 연동된다.</p>
+        <p>라이선스는 <strong>Apache 2.0</strong>으로, 개인·기업 모두 무료로 사용·수정·상업화가 가능하다. 구글은 에이전트 기능을 모듈 형태로 제공하는 '젬마 스킬(Gemma Skills)' 공식 저장소도 함께 공개해, 개발자가 복잡한 자율형 AI 시스템을 보다 쉽게 구축할 수 있도록 지원한다.</p>
+        <p>이번 공개는 단순한 모델 릴리스를 넘어, <strong>온프레미스·엣지 AI 시장의 패러다임 전환</strong>을 가속한다. 데이터 보안과 프라이버시를 이유로 클라우드 AI 도입을 꺼려온 금융·의료·공공 부문 기업들에게 '클라우드 없는 프론티어급 AI'라는 새로운 선택지가 생긴 것이다.</p>
+      </div>
+      <div class="card-insight"><strong>💡 테크핀 연관:</strong> 16GB 노트북에서 완전 구동 가능한 멀티모달 오픈소스 LLM의 등장은, 더존 ERP 세무·상거래 데이터를 외부로 전송하지 않고 온프레미스에서 AI 신용분석·경영진단을 실행하는 데이터 주권 전략의 핵심 기술 기반이 된다. 클라우드 벤더 의존 없이 자체 인프라에서 고성능 AI를 구동하면 데이터 보안과 운용 비용 통제를 동시에 달성할 수 있다.</div>
+    </article>
+  </section>
+
+  <!-- 에이전트 -->
+  <section class="company">
+    <div class="company-head">
+      <span class="company-num">🧩</span>
+      <h2 class="company-name">에이전트 · 오픈소스 · 개발</h2>
+    </div>
+
+    <article class="ko-entry" id="agents-1">
+      <div class="ko-entry-head">
+        <span class="source-chip">OpenAI</span><span class="date-chip near">2026-06-02</span>
+        <a class="kr-src" href="https://www.digitalfocus.news/news/articleView.html?idxno=21286" target="_blank" rel="noopener">국내 보도 (디지털포커스)</a>
+        <a class="ko-orig" href="https://openai.com/index/codex-for-almost-everything/" target="_blank" rel="noopener">원문 보기 ↗</a>
+      </div>
+      <h3 class="ko-title">OpenAI 코덱스, 비개발자·화이트칼라 전면 개방 — Sites·6종 직무별 플러그인(투자은행·주식투자 포함), 주간 활성 500만</h3>
+      <div class="ko-body">
+        <p>OpenAI가 2026년 6월 2일 AI 에이전트 플랫폼 코덱스(Codex)에 대규모 업데이트를 발표했다. 이번 업데이트의 핵심은 코덱스를 개발자 전용 도구에서 <strong>전 직군 화이트칼라 업무 자동화 플랫폼</strong>으로 확장한 것이다.</p>
+        <p>가장 주목할 신기능은 <strong>6개 직무별 플러그인</strong>이다. 데이터 분석·크리에이티브 제작·영업·제품 디자인·주식 투자·투자은행(Investment Banking) 등 6개 전문 직무에 최적화된 플러그인이 출시됐다. 각 플러그인은 스노우플레이크(Snowflake)·피그마(Figma)·세일즈포스(Salesforce) 등 62개 주요 업무 앱과 110개 자동화 스킬을 바로 연결한다. 특히 투자은행 전용 플러그인은 기업 밸류에이션, 재무 모델링, M&amp;A 분석 등에 특화된 기능을 제공한다.</p>
+        <p>두 번째 주요 기능은 <strong>'Sites'</strong>다. 웹사이트·대시보드·내부 업무툴·앱을 코덱스 앱 내에서 직접 생성·배포·관리할 수 있는 반숙련 사용자용 웹 호스팅 기능이다. 개발 경험이 없는 직원도 AI의 도움을 받아 즉시 배포 가능한 내부 툴을 만들 수 있게 됐다.</p>
+        <p>세 번째로 <strong>'Annotations(주석)'</strong> 기능이 추가됐다. 문서·코드베이스 내 특정 부분에 AI 에이전트가 직접 설명·검토·수정을 달아주는 인플레이스 편집 도구다. 이로써 코덱스는 단순 코드 생성을 넘어 기업 문서 전반의 AI 협업 플랫폼으로 진화했다.</p>
+        <p>현재 코덱스의 주간 활성 사용자(WAU)는 <strong>500만 명</strong>에 달한다. 이 중 비개발자 비중이 <strong>20%</strong>로, 엔지니어보다 3배 빠른 속도로 증가 중이다. OpenAI는 "코덱스는 이제 단지 개발자를 위한 도구가 아니다"라고 공식 발표했다.</p>
+        <p>이번 업데이트의 전략적 의미는 명확하다. 소프트웨어 개발에서 시작한 AI 에이전트가 이제 금융 분석·마케팅·디자인·영업 등 지식 노동 전 영역을 자동화하는 <strong>범용 화이트칼라 AI 플랫폼</strong>으로 진화했다. 이는 기업 내 AI 에이전트 채택의 범위를 IT 부서에서 전 사업부로 확장하는 분기점이 된다.</p>
+      </div>
+      <div class="card-insight"><strong>💡 테크핀 연관:</strong> 코덱스의 투자은행·주식투자 전용 에이전트 플러그인은 테크핀 AI 경영진단 보고서·여신심사 워크플로우와 직접 경쟁하는 상품이다. 더존 ERP 세무·상거래 데이터를 전용 컨텍스트로 연계하는 테크핀만의 금융 특화 에이전트를 선제 구축하면, 범용 AI 플러그인이 따라올 수 없는 데이터 해자 기반의 차별화가 가능하다.</div>
+    </article>
+
+    <article class="ko-entry" id="agents-2">
+      <div class="ko-entry-head">
+        <span class="source-chip">Anthropic</span><span class="date-chip near">2026-06-03</span>
+        <a class="ko-orig" href="https://www.anthropic.com/news/services-track-partner-hub" target="_blank" rel="noopener">원문 보기 ↗</a>
+      </div>
+      <h3 class="ko-title">앤트로픽, 클로드 파트너 네트워크 '서비스 트랙' 3단계 체계 공식 출범 — 4만+ 기업 신청·1만+ 인증 취득·파트너 허브 포털</h3>
+      <div class="ko-body">
+        <p>앤트로픽이 2026년 3월에 1억 달러 투자와 함께 출범한 클로드 파트너 네트워크(Claude Partner Network)를 한층 강화해, 2026년 6월 3일 <strong>'서비스 트랙(Services Track)'과 파트너 허브(Partner Hub) 포털</strong>을 공식 발표했다.</p>
+        <p>서비스 트랙은 AI 컨설팅·구현 서비스를 제공하는 파트너사의 역량을 3단계로 인증하는 체계다. <strong>Select</strong> 등급은 인증 취득자 10명 이상, 최근 12개월 내 프로덕션 배포 고객 2건 이상, 공개 고객 사례 1건 이상이 요구된다. <strong>Preferred</strong> 등급은 인증 100명 이상, 배포 고객 15건 이상, 공개 사례 3건 이상이 필요하다. 최상위 <strong>Global Premier</strong> 등급은 인증 1,000명 이상, 3개 이상의 지역에 걸쳐 100건 이상의 배포 고객, 공개 사례 15건 이상, 그리고 앤트로픽 본사 임원과의 공동 사업 계획이 요구된다.</p>
+        <p>파트너 허브 포털은 두 가지 기능을 동시에 제공한다. 파트너사는 자신의 등급 달성 현황을 실시간으로 확인하고 부족한 요건을 파악할 수 있다. 고객사는 프로젝트 규모와 특성에 맞는 파트너사를 검색·비교할 수 있다. 허브의 데이터는 매일 자동 갱신된다.</p>
+        <p>프로그램의 성장 속도는 놀랍다. 클로드 파트너 네트워크 출범 이후 <strong>4만 개 이상의 기업이 파트너십을 신청</strong>했으며, <strong>1만 명 이상이 클로드 공식 인증</strong>을 취득했다. 등급 심사는 연 2회(1월 1일·7월 1일) 진행되며, 2026년에는 10월 1일 추가 심사가 있다.</p>
+        <p>이번 발표는 앤트로픽의 전략적 방향 전환을 명확하게 보여준다. 단순히 API를 판매하는 모델 제공사에서, 기업 AI 도입 전 과정을 지원하는 <strong>엔터프라이즈 AI 생태계 구축자</strong>로의 포지션 이동이다. OpenAI의 Operator 파트너 프로그램, 구글의 Gemini for Workspace 파트너 체계와 유사하지만, 3단계 인증이라는 명확한 역량 지표를 도입해 차별화했다.</p>
+        <p>국내에서는 SKT·삼성·SK하이닉스가 이미 앤트로픽의 Project Glasswing에 참여 중이며, 앤트로픽은 2026년 초 서울 강남에 한국 사무소를 개설해 국내 파트너 생태계 구축을 본격화하고 있다.</p>
+      </div>
+      <div class="card-insight"><strong>💡 테크핀 연관:</strong> 앤트로픽의 파트너 생태계 확대로 클로드 기반 금융 AI 솔루션 공급자가 늘어나며 시장 경쟁이 심화된다. 테크핀이 Select 등급 파트너로 참여해 더존 ERP 데이터 기반 신용·진단 솔루션을 파트너 허브에 등록하면, 앤트로픽의 글로벌 고객 베이스를 활용한 새로운 배포 경로를 열 수 있다.</div>
+    </article>
+  </section>
+
+  <!-- 금융 -->
+  <section class="company">
+    <div class="company-head">
+      <span class="company-num">🏦</span>
+      <h2 class="company-name">금융 · 신용 · 핀테크 AI</h2>
+      <span class="company-sub">최우선 추적 영역</span>
+    </div>
+
+    <article class="ko-entry" id="finance-1">
+      <div class="ko-entry-head">
+        <span class="source-chip">GlobeNewswire</span><span class="date-chip near">2026-06-02</span>
+        <a class="ko-orig" href="https://www.globenewswire.com/news-release/2026/06/02/3305441/0/en/Corporate-Insight-Releases-Groundbreaking-New-Study-on-AI-in-Financial-Services-Fintech-Innovation-Surges-Consumer-Trust-Lags.html" target="_blank" rel="noopener">원문 보기 ↗</a>
+      </div>
+      <h3 class="ko-title">Corporate Insight 연구 — '핀테크 AI 혁신 급성장·소비자 신뢰 뒤처져', 금융 AI 신뢰 격차가 새로운 시장 경쟁 축으로</h3>
+      <div class="ko-body">
+        <p>시장조사 전문기관 Corporate Insight(CI)가 2026년 6월 2일 'AI in Financial Services Today: The Opportunity, the Risk and the Emerging Reality'라는 대규모 보고서를 발표했다. 이 보고서는 세 가지 상호보완적 데이터 소스를 통합했다: 21개 금융 버티컬에 걸친 CI의 지속적 모니터링 리서치, 2026년 1월 진행된 심층 소비자 인터뷰, 그리고 2026년 2월 미국 성인 2,000명 이상을 대상으로 한 설문조사다.</p>
+        <p>보고서의 핵심 발견은 <strong>'혁신-신뢰 격차(Innovation-Trust Gap)'</strong>다. 핀테크 기업들은 AI 기반 신용평가·투자 자문·자동화 서비스를 빠르게 출시하고 있지만, 소비자들의 신뢰는 이 혁신 속도를 따라가지 못하고 있다. 개인 재무 데이터를 AI에 공유하는 것에 대한 우려가 신규 AI 금융 서비스 채택의 주요 병목으로 작용하고 있다는 것이다.</p>
+        <p>구체적인 수치도 주목할 만하다. <strong>금융 서비스 기업의 81%</strong>가 어떤 형태로든 AI를 채택하고 있으며, 이 중 40%는 'Scaling' 또는 'Transforming' 수준의 고도화된 AI 도입을 달성했다. 그러나 AI 도입의 전략적 가치를 명확히 인식하는 비율은 14%에 그쳐, 도입과 이해 사이의 간극이 크다.</p>
+        <p>보고서는 이 신뢰 격차를 메우기 위한 세 가지 전략을 제시한다. 첫째, AI 의사결정 과정의 <strong>설명가능성(Explainability)</strong> 강화. 둘째, AI가 내린 결정에 대한 <strong>인간 검토 채널</strong> 명시. 셋째, 개인정보 처리 방침의 <strong>명확한 소비자 소통</strong>이다. 이 세 요소를 갖춘 금융 AI 솔루션은 소비자 신뢰를 확보하면서도 혁신의 이점을 누릴 수 있다는 것이 보고서의 결론이다.</p>
+        <p>이번 연구는 금융 AI 시장의 경쟁 구도 변화를 예고한다. AI 기능의 우열이 점차 비슷해지는 상황에서, 이제는 <strong>얼마나 신뢰할 수 있는 AI를 제공하느냐</strong>가 차별화의 핵심 축이 되고 있다. 2026년 하반기부터 설명가능성·투명성을 갖춘 AI 금융 솔루션이 시장에서 구조적 우위를 가질 것으로 전망된다.</p>
+        <p>또한 이 보고서는 금융 AI 채택의 '실행 격차(Execution Gap)'를 재확인한다. 전날 nCino 보고서(2026-06-02)가 경고한 바와 마찬가지로, 많은 기업이 AI를 도입했지만 실제 비즈니스 성과로 연결하는 데 어려움을 겪고 있다. 소비자 신뢰 확보와 ROI 입증 모두를 달성하는 솔루션만이 시장에서 살아남을 것이라는 신호다.</p>
+      </div>
+      <div class="card-insight"><strong>💡 테크핀 연관:</strong> 소비자 신뢰 격차는 테크핀 CSS 신용평가 AI에 직접 적용된다. 더존 ERP 기반으로 검증된 월단위 실시간 데이터를 활용한다는 투명성, 이상결정 시 자동 생성되는 이유 코드(reason code), 그리고 인간 심사역의 최종 검토 채널을 납품 패키지에 내재화하면 신뢰 격차를 전략적 차별화 포인트로 전환할 수 있다.</div>
+    </article>
+
+    <article class="ko-entry" id="finance-2">
+      <div class="ko-entry-head">
+        <span class="source-chip">Federal Reserve</span><span class="date-chip near">2026-05-27</span>
+        <a class="ko-orig" href="https://www.federalreserve.gov/newsevents/speech/cook20260527a.htm" target="_blank" rel="noopener">원문 보기 ↗</a>
+      </div>
+      <h3 class="ko-title">연준 쿡 총재, AI가 경제·금융 시스템에 미치는 기회와 리스크 공개 경고 — 생산성 기대와 'AI 버블' 가능성 동시 언급</h3>
+      <div class="ko-body">
+        <p>미국 연방준비제도(Fed) 이사 <strong>리사 쿡(Lisa Cook)</strong>이 2026년 5월 27일 캘리포니아주 스탠퍼드 대학교 스탠퍼드 경제정책연구소(SIEPR)에서 'AI가 경제와 금융 시스템에 제기하는 기회와 리스크'를 주제로 연설했다.</p>
+        <p>쿡 이사는 AI의 생산성 효과를 긍정적으로 평가했다. AI가 노동 생산성을 크게 향상시키고 실질 임금을 끌어올릴 잠재력이 있으며, 새로운 상품·기업·일자리를 창출하는 아이디어 생성 속도를 가속할 것이라고 밝혔다. 이는 중앙은행의 중립금리 추정치에도 영향을 미칠 수 있다는 점을 언급했다.</p>
+        <p>그러나 핵심은 연준 이사가 <strong>'AI가 실망시킬 경우(What if AI disappoints?)'</strong>를 명시적으로 언급했다는 점이다. 쿡 이사는 금융 안정성 측면에서, AI에 대한 과도한 기대가 현실과 괴리될 경우 발생할 수 있는 시장 조정(market correction)의 테일 리스크를 공개적으로 경고했다. 이는 AI 붐에 대한 중앙은행 당국자의 첫 번째 공식적인 거품 가능성 경고로 해석된다.</p>
+        <p>노동 시장에 대해서도 신중한 입장을 밝혔다. AI로 인한 업무 자동화가 일자리 창출에 앞서 고용 감소를 먼저 유발할 수 있으며, 실업률이 상승하고 노동 참여율이 하락할 수 있다고 경고했다. 이 경우 연준이 통화 정책 결정 시 이를 반드시 반영해야 한다는 점을 강조했다.</p>
+        <p>쿡 이사는 특히 금융 기관들이 AI에 노출된 대출·투자 포지션에 대한 <strong>스트레스 테스트 시나리오</strong>를 강화해야 한다고 촉구했다. 시카고 연준이 앞서 경고한 AI 투자 익스포저 규모($4,500억, Tier 1 자본의 25%)와 함께, 이번 연설은 미국 금융 당국이 AI 버블 리스크를 심각하게 검토하기 시작했음을 시사한다.</p>
+        <p>또한 AI 기술이 창출하는 생산성 이익이 모든 계층에 균등하게 배분되지 않을 경우 불평등이 심화될 수 있다는 사회적 리스크도 언급했다. 이는 AI 규제가 단순한 기술 안전 문제를 넘어 사회경제적 형평성 논의로 확장될 것임을 예고한다.</p>
+      </div>
+      <div class="card-insight"><strong>💡 테크핀 연관:</strong> 연준이 AI 금융 버블 테일 리스크를 공식 경고한 것은 은행 AI 모델의 스트레스 테스트와 리스크 관리 체계 강화에 대한 규제 압력이 높아질 신호다. 테크핀 CSS·EWS 모델의 스트레스 시나리오(AI 버블 시나리오 포함)를 선제 정비하고 납품 계약서에 리스크 관리 KPI를 명시하면, 은행의 AI 거버넌스 요구에 선제 대응하는 솔루션으로 포지셔닝할 수 있다.</div>
+    </article>
+  </section>
+
+  <!-- 정책 -->
+  <section class="company">
+    <div class="company-head">
+      <span class="company-num">📜</span>
+      <h2 class="company-name">정책 · 규제 · 거버넌스</h2>
+    </div>
+
+    <article class="ko-entry" id="policy-1">
+      <div class="ko-entry-head">
+        <span class="source-chip">Variety</span><span class="date-chip near">2026-05-28</span>
+        <a class="kr-src" href="https://news.sbs.co.kr/news/endPage.do?news_id=N1008585636" target="_blank" rel="noopener">국내 보도 (SBS뉴스)</a>
+        <a class="ko-orig" href="https://variety.com/2026/biz/news/cnn-sues-perplexity-alleging-copyright-infringement-1236760987/" target="_blank" rel="noopener">원문 보기 ↗</a>
+      </div>
+      <h3 class="ko-title">CNN, AI 검색 스타트업 퍼플렉시티 저작권 소송 — 기사·영상·이미지 1만7,000건 무단 학습, TV 방송사 최초 AI 저작권 소송</h3>
+      <div class="ko-body">
+        <p>CNN이 2026년 5월 28일 미국 뉴욕 연방남부지방법원(SDNY)에 AI 검색 스타트업 <strong>퍼플렉시티(Perplexity AI)</strong>를 상대로 저작권 침해 및 상표권 침해 소송을 제기했다. CNN이 AI 기업을 상대로 법적 대응에 나선 것은 이번이 처음이며, TV 방송사로서는 AI 저작권 소송의 전례를 남긴 첫 사례가 됐다.</p>
+        <p>소송의 핵심 주장은 다음과 같다. 퍼플렉시티가 자체 크롤러 'PerplexityBot'을 이용해 CNN의 온라인 플랫폼과 제3자 플랫폼에서 <strong>기사·사진·영상·기타 콘텐츠 1만 7,000건 이상</strong>을 무단으로 크롤링했다. 이 데이터를 AI 검색 인덱스 구축과 LLM 학습에 활용하면서, 사용자가 퍼플렉시티에서 질문을 하면 CNN의 독점 보도를 기반으로 생성된 답변을 제공했다. 이 과정에서 사용자가 CNN 원문 기사를 방문할 이유가 없어지므로 CNN의 구독 모델과 광고 수익이 직접적인 피해를 받았다는 것이다.</p>
+        <p>상표권 침해 주장도 포함됐다. 퍼플렉시티가 'Comet Plus' 구독 등급에서 "CNN 프리미엄 콘텐츠에 접근 가능하다"고 광고했지만, 실제로는 CNN과 아무런 라이선싱 계약이 없었다. 이는 소비자를 오도하는 허위 광고이자 CNN의 상표권을 침해하는 행위라는 주장이다.</p>
+        <p>CNN은 소송 전에 퍼플렉시티와 콘텐츠 라이선싱 협상을 시도했지만 협상이 결렬됐다. 한편 CNN은 경쟁 AI 기업 메타(Meta AI)와는 정식 라이선스 계약을 체결해, CNN 보도를 메타 AI가 활용하는 대가로 보상을 받고 있다. 이는 AI 기업과의 협력이 법적 분쟁 없이도 가능하다는 것을 보여주는 대비 사례가 됐다.</p>
+        <p>이번 소송은 AI 콘텐츠 저작권 분쟁의 전선이 확대되고 있음을 상징한다. 앞서 뉴욕타임스·시카고 트리뷴·음악 저작권 단체 등이 OpenAI·Anthropic·Perplexity 등을 상대로 유사한 소송을 제기한 바 있으며, 이번 CNN 소송으로 방송·영상 콘텐츠 분야까지 전선이 확대됐다.</p>
+        <p>퍼플렉시티 측은 "사실(facts)에는 저작권이 없다"는 주장으로 방어 입장을 밝혔으나, 전문가들은 CNN의 소송이 단순 사실 보도가 아닌 편집·분석·영상 제작이라는 창작 요소를 포함한다는 점에서 성립 가능성이 높다고 분석한다. 판결은 향후 AI 산업 전체의 데이터 라이선싱 관행을 재정립하는 선례가 될 것으로 전망된다.</p>
+        <p>한국에서도 언론사들이 AI 기업의 무단 콘텐츠 크롤링 문제를 제기하기 시작했으며, 이번 CNN 소송은 국내 미디어 법적 대응의 참고 사례가 될 것으로 보인다.</p>
+      </div>
+      <div class="card-insight"><strong>💡 테크핀 연관:</strong> AI 저작권 소송 확산은 독점 데이터 원천의 법적 보호 중요성을 부각한다. 더존 ERP 세무·상거래 데이터가 외부 AI 학습에 무단으로 사용될 경우의 법적 대응 가능성과, 데이터 라이선싱 계약 시 사용 범위·조건을 명시하는 데이터 IP 보호 체계를 지금 구축하면 향후 데이터 수익화와 법적 방어를 동시에 달성할 수 있다.</div>
+    </article>
+  </section>
+
+  <footer class="page-footer">
+    한글 상세본 · 자체 작성 · 2026-06-05 · <a href="/ai/archive/2026-06-05.html">← 카드 요약본</a> · <a href="/ai/">최신 AI 다이제스트</a> · <a href="/">경쟁사 동향 다이제스트</a>
+  </footer>
+
+</div>
+</body>
+</html>
