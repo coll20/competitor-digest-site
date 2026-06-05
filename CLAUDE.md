@@ -84,10 +84,11 @@
   - Sources: `{기사 제목} — {매체명}` 형식. 관련 스타일(`.card-meta`/`.source-chip`/`.src-tag`)은 `styles.css`에 정의됨.
 - **링크 무결성 (필수, 2026-05-30)**: 모든 링크는 개별 기사의 완전한 실제 URL만. 검색결과 페이지(`search.naver.com`)·목록 페이지(`korearatings.com/cms` 등 기사 본문 아님)·잘린/플레이스홀더 URL·날조 URL 금지. 배포 직전 전수 검증(아래 STEP 9.5).
 
-## 로컬 클론 / 동기화
-- 이 저장소는 로컬 `/home/jaykwon/projects/27th-agent`에 클론돼 있다 (origin = `coll20/competitor-digest-site`).
+## 로컬 클론 / 동기화 (다른 PC에서 작업 시작하기)
+- 이 저장소는 머신마다 다른 경로에 클론한다. 현재 주 작업 PC 기준 `/home/jaykwon/projects/33rd-agent/digest-site` (origin = `coll20/competitor-digest-site`). (구 경로 `27th-agent`은 폐기.)
+- **새 PC 셋업**: ① `gh auth login`(account `coll20`, scope `repo`+`workflow`) → git push가 gh credential helper로 자동 인증됨. ② `git clone https://github.com/coll20/competitor-digest-site.git`. ③ 루틴 관리는 Claude Code의 `RemoteTrigger`/`/schedule`(claude.ai 계정 인증, PC 무관)로 어디서든 가능 — 별도 키 불필요. ④ 비상 수동 운영용 원본 시크릿(카카오·Gmail·PAT 원본값)은 이 repo에 없고, 로컬 전용 마스터 노트(주 PC의 `33rd-agent/CLAUDE.md`, git 비추적)에만 있다 — 필요 시 안전한 채널로 별도 전달.
 - `.claude/`는 **`.gitignore`에 등록**돼 있다 — 로컬 `settings.local.json`에 PAT가 평문으로 있어 절대 커밋 금지.
-- 로컬에서 push: 토큰을 git config에 저장하지 않고 일회성으로만 사용 → `git -c credential.helper= push "https://x-access-token:<PAT>@github.com/coll20/competitor-digest-site.git" HEAD:main`.
+- 로컬에서 push: gh 인증이 있으면 `git push origin HEAD:main`. gh 없이 토큰으로 일회성 push → `git -c credential.helper= push "https://x-access-token:<PAT>@github.com/coll20/competitor-digest-site.git" HEAD:main`.
 
 ## AI 기술 동향 다이제스트 (/ai)
 글로벌 AI 기술 동향을 매일 정리하는 두 번째 다이제스트. 같은 repo·Netlify·deploy·notify 인프라 위에서 `/ai` 경로로 서빙된다.
