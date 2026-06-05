@@ -2,7 +2,7 @@
 
 경쟁사 주간 동향 다이제스트 사이트. 한국 신용평가/기업데이터 5개사를 매일 추적하는 **정적 웹사이트**다. 콘텐츠는 사람이 아니라 **스케줄된 원격 Claude 루틴**이 매일 생성·커밋하고, GitHub Actions가 Netlify에 자동 배포한다.
 
-> **이 repo는 두 개의 다이제스트를 호스팅한다.** ① 루트(`/`) = 경쟁사 주간 동향(5개사), ② `/ai` = 글로벌 AI 기술 동향. 둘 다 같은 Netlify 사이트·deploy.yml·notify 인프라를 공유하며, 각자 별도의 생성 루틴을 가진다. 아래 문서는 주로 경쟁사 다이제스트 기준이며, AI 다이제스트 전용 내용은 **`## AI 기술 동향 다이제스트 (/ai)`** 섹션 참조.
+> **이 repo는 세 개의 다이제스트를 호스팅한다.** ① 루트(`/`) = 경쟁사 주간 동향(5개사), ② `/ai` = 글로벌 AI 기술 동향, ③ `/fsc` = 금융위원회(FSC) 동향. 셋 다 같은 Netlify 사이트·deploy.yml·notify 인프라를 공유하며, 각자 별도의 생성 루틴을 가진다. 아래 문서는 주로 경쟁사 다이제스트 기준이며, AI 다이제스트는 **`## AI 기술 동향 다이제스트 (/ai)`**, 금융위 다이제스트는 **`## FSC 동향 다이제스트 (/fsc)`** 섹션 참조.
 
 ## Live & Infra
 - **Live**: https://competitor-digest-jay-1779945070.netlify.app
@@ -106,7 +106,25 @@
 - **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ create/update 스키마: `session_context`는 `job_config.ccr` **안에** 위치(model/allowed_tools 포함), `events[].data`에 `uuid/session_id/type/parent_tool_use_id` 필요.
 - ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사 루틴과 동일 토큰). 이 repo에 커밋 금지.
 
+## FSC 동향 다이제스트 (/fsc)
+대한민국 **금융위원회(FSC) 알림마당**을 매일 모니터링하는 세 번째 다이제스트. 같은 repo·Netlify·deploy·notify 인프라 위에서 `/fsc` 경로로 서빙된다. 금융위는 신용평가·기업데이터·핀테크 업계의 직접 규제기관이다.
+- **Live**: https://competitor-digest-jay-1779945070.netlify.app/fsc/
+- **파일**: `fsc/index.html`(최신), `fsc/archive/<date>.html`(아카이브), `fsc/archive/manifest.json`, `fsc/styles.css`(네이비/골드 자체 테마), `fsc/sidebar.js`(`/fsc/archive/manifest.json` fetch, `/fsc/`로 링크).
+- **모니터링 9개 게시판**: 📰 보도자료(`/no010101`) · 🗣️ 보도설명(`/no010102`) · 📢 새소식(`/no010105`) · 🏛️ 금융위 의결(`/no020101`) · ⚖️ 증선위 의결(`/no020102`) · 🚫 제재정보(`/no020103`, 상세는 주로 금감원 fss.or.kr) · 📈 금융시장동향(`/no030101`) · 📊 금융지표(`/no030102`) · 🎴 카드뉴스(`/no040101`).
+- **생성 루틴 ID**: `trig_01SryyhJftXg4VH1suEHgeF3` (이름: "Daily FSC (금융위) Digest")
+  - **cron**: `0 20 * * *` (UTC) = **05:00 KST** — AI(06:00)·경쟁사(07:00)보다 먼저 실행해 07:30 알림 전 셋 다 준비. push는 `git pull --rebase` 후 수행(다른 루틴과 충돌 방지).
+  - **model**: `claude-sonnet-4-6`, env `env_012Eb5mv4x1BeWNXF8NxBfz9`(공유).
+- **콘텐츠 구조**: 🎯 오늘의 핵심(TOP 3) → **9개 게시판 섹션** 카드(게시판칩 + 원문 제목 인라인 링크 + 2~3문장 자체 요약 + 💡 업계 함의) → 💡 **신용평가·핀테크 업계 함의 종합** → 📚 이번 주 누적(recap) → Sources.
+  - 차별점: **금융위 원문(fsc.go.kr) 직접 링크**, post ID 기반 dedup(뉴스보다 정확), 각 항목에 신용평가/기업데이터/핀테크 업계 함의. PDF·이미지 위주 게시판(의결서·금융지표·카드뉴스)은 제목·안건명만 보수적 요약 + 링크(추측·날조 금지).
+- **dedup·링크검증**: 전날 FSC 아카이브 대비 post URL/ID로 NEW/ALREADY_COVERED 분류 → recap, 배포 직전 STEP 9.5 전 URL 검증(HTTP 200 + 상세페이지 존재).
+- **알림 통합**: `notify.py`가 세 manifest(`/archive` + `/ai/archive` + `/fsc/archive`)를 모두 읽어 **1통**에 세 섹션(경쟁사 + AI + 금융위)으로 발송. FSC manifest 없으면 해당 섹션만 생략(graceful).
+- **크로스링크**: 경쟁사·AI 사이드바에 `/fsc` 행 추가, FSC 사이드바에 `/`·`/ai` 행. 루틴이 전날 아카이브를 템플릿으로 쓰므로 링크가 매일 보존·전파됨.
+- **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ 게시판 추가/제거 시 STEP 4 board 목록 + STEP 8 sidebar anchors 동시 수정.
+- ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사/AI 루틴과 동일 토큰). 이 repo에 커밋 금지.
+
 ## 작업 로그
+- **2026-06-05**:
+  - **금융위원회(FSC) 동향 다이제스트(`/fsc`) 추가** — 3번째 다이제스트. 금융위 알림마당 9개 게시판(보도자료·보도설명·새소식·금융위/증선위 의결·제재정보·금융시장동향·금융지표·카드뉴스)을 매일 모니터링. 네이비/골드 자체 테마, 게시판별 섹션 + 오늘의 핵심 TOP3 + 업계 함의 종합. 창간호 시드(보도자료 6·보도설명 3·새소식 1·금융위 의결 1·금융시장동향 1 카드, 전 항목 fsc.go.kr 원문 검증). 생성 루틴 `trig_01SryyhJftXg4VH1suEHgeF3`(05:00 KST). `notify.py`를 세 다이제스트 통합 1통 발송으로 확장(경쟁사+AI+금융위). 3-way 사이드바 크로스링크.
 - **2026-06-02**:
   - **글로벌 AI 기술 동향 다이제스트(`/ai`) 추가** — 5개 영역 카드 + 테크핀 인사이트 섹션, 자체 테마 CSS/sidebar, 창간호 시드(12개 항목 전수 링크검증), 생성 루틴 `trig_01FJQEYTS9m2b9cB3a2qp14J`(06:00 KST), `notify.py`를 두 다이제스트 통합 1통 발송으로 확장, 양 사이트 크로스링크.
   - **AI 한글 상세 기능** — `🇰🇷 한글로 읽기` 버튼 + `ai/archive/<date>-ko.html`(자체 작성 한글 상세본) + 글로벌 1차/국내 보조 링크(`🇰🇷 국내 보도`). AI 루틴에 영구 반영(STEP 4·6·8.5·8.6·9.5). 시드 국내 보도칩 2건(앤트로픽 금융에이전트=ZDNet, EU AI법=디지털투데이).

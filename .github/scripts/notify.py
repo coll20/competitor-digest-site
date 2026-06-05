@@ -20,6 +20,8 @@ SITE_URL = "https://competitor-digest-jay-1779945070.netlify.app"
 MANIFEST_URL = f"{SITE_URL}/archive/manifest.json"
 AI_URL = f"{SITE_URL}/ai/"
 AI_MANIFEST_URL = f"{SITE_URL}/ai/archive/manifest.json"
+FSC_URL = f"{SITE_URL}/fsc/"
+FSC_MANIFEST_URL = f"{SITE_URL}/fsc/archive/manifest.json"
 REPO = "coll20/competitor-digest-site"
 
 
@@ -147,6 +149,22 @@ def main():
     except Exception as e:
         print(f"::warning::AI manifest fetch failed ({e}) — sending competitor-only notification")
 
+    # FSC (금융위) digest manifest is optional — degrade gracefully if missing/empty.
+    fsc = None
+    try:
+        fsc_manifest = http_get_json(f"{FSC_MANIFEST_URL}?t={int(time.time())}")
+        if fsc_manifest:
+            fsc_latest = fsc_manifest[0]
+            fsc = {
+                "date": fsc_latest["date"],
+                "headline": fsc_latest.get("headline", "(헤드라인 없음)"),
+            }
+            print(f"      FSC latest: date={fsc['date']}  headline={fsc['headline']}")
+        else:
+            print("      FSC manifest empty — skipping FSC section")
+    except Exception as e:
+        print(f"::warning::FSC manifest fetch failed ({e}) — skipping FSC section")
+
     print("[2/4] Refreshing Kakao access token...")
     access_token, new_refresh = refresh_kakao(rest_api_key, refresh_token)
     if new_refresh and new_refresh != refresh_token:
@@ -175,10 +193,20 @@ def main():
             f"\n\n────────────\n🤖 {ai['date']} 글로벌 AI 기술 동향\n\n"
             f"{ai['headline']}\n\n🔗 {AI_URL}"
         )
+    if fsc:
+        kakao_text += (
+            f"\n\n────────────\n🏛️ {fsc['date']} 금융위원회 동향\n\n"
+            f"{fsc['headline']}\n\n🔗 {FSC_URL}"
+        )
 
-    # ---- Build Gmail (one mail, two sections) ----
+    # ---- Build Gmail (one mail, multiple sections) ----
+    sections = ["경쟁사"]
     if ai:
-        gmail_subject = f"[데일리 다이제스트] {date} 경쟁사 + AI 기술 동향"
+        sections.append("AI 기술 동향")
+    if fsc:
+        sections.append("금융위 동향")
+    if len(sections) > 1:
+        gmail_subject = f"[데일리 다이제스트] {date} " + " + ".join(sections)
     else:
         gmail_subject = f"[경쟁사 다이제스트] {date} — {headline[:60]}"
 
@@ -196,6 +224,20 @@ def main():
       </a>
     </p>"""
 
+    fsc_section = ""
+    if fsc:
+        fsc_section = f"""
+    <p style="color:#888;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:28px 0 8px;">FSC REGULATORY WATCH</p>
+    <h2 style="margin:0 0 16px;font-size:22px;color:#b8860b;">🏛️ {fsc['date']} 금융위원회 동향</h2>
+    <p style="font-size:16px;color:#333;background:#fdf6e3;padding:16px 20px;border-radius:8px;border-left:3px solid #e3b341;margin:0 0 20px;">
+      {fsc['headline']}
+    </p>
+    <p style="margin:0 0 8px;">
+      <a href="{FSC_URL}" style="display:inline-block;background:linear-gradient(135deg,#e3b341,#5b8dd6);color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
+        🔗 금융위 다이제스트 열기
+      </a>
+    </p>"""
+
     gmail_html = f"""<!DOCTYPE html>
 <html><body style="font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;line-height:1.6;color:#222;background:#f5f5f7;margin:0;padding:24px;">
   <div style="max-width:560px;margin:0 auto;background:white;border-radius:12px;padding:32px;">
@@ -208,18 +250,19 @@ def main():
       <a href="{SITE_URL}" style="display:inline-block;background:linear-gradient(135deg,#6ea8ff,#b794ff);color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
         🔗 경쟁사 다이제스트 열기
       </a>
-    </p>{ai_section}
+    </p>{ai_section}{fsc_section}
     <p style="font-size:12px;color:#999;margin:32px 0 0;border-top:1px solid #eee;padding-top:16px;">
       매일 KST 자동 수집 → 카카오톡·이메일 동시 발송<br>
       경쟁사: <a href="{SITE_URL}" style="color:#6ea8ff;">{SITE_URL}</a><br>
-      AI 동향: <a href="{AI_URL}" style="color:#2dd4bf;">{AI_URL}</a>
+      AI 동향: <a href="{AI_URL}" style="color:#2dd4bf;">{AI_URL}</a><br>
+      금융위: <a href="{FSC_URL}" style="color:#b8860b;">{FSC_URL}</a>
     </p>
   </div>
 </body></html>"""
 
     print("[3/4] Sending KakaoTalk...")
     send_kakao(access_token, kakao_text, SITE_URL)
-    print(f"      ✓ KakaoTalk sent ({'2 sections' if ai else 'competitor only'})")
+    print(f"      ✓ KakaoTalk sent ({len(sections)} section{'s' if len(sections) > 1 else ''}: {', '.join(sections)})")
 
     print("[4/4] Sending Gmail...")
     send_gmail(gmail_user, gmail_password, gmail_subject, gmail_html, bcc=bcc_list)
