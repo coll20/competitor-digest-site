@@ -1,12 +1,26 @@
 name: Daily Notify (Kakao + Gmail)
 
+# 알림은 시간(cron)이 아니라 '배포 완료' 이벤트로 발송한다.
+# 이유: GitHub Actions의 schedule 트리거는 부하 시간대에 1~1.5h씩 지연돼
+#       알림이 07:30이 아니라 거의 09:00에 도착했다(2026-06-05 확인).
+# 동작: 매일 마지막 다이제스트(경쟁사, 07:00 KST)의 Netlify 배포가 성공하면
+#       곧바로(~07:06 KST) 발송. 그 시점엔 FSC(05:00)·AI(06:00)도 이미 배포돼
+#       세 manifest 모두 최신이고 사이트도 라이브 상태다.
 on:
-  schedule:
-    - cron: "30 22 * * *"  # 22:30 UTC = 07:30 KST (next day)
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy to Netlify"]
+    types: [completed]
+  workflow_dispatch:        # 수동 발송(테스트)
 
 jobs:
   notify:
+    # 경쟁사 다이제스트 배포(커밋 "Daily digest: …")가 성공했을 때만 발송.
+    # AI("Daily AI digest:")·FSC("Daily FSC digest:")·수동 편집 푸시의 배포에는 발송 안 함.
+    # 수동 dispatch는 항상 허용.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_commit.message, 'Daily digest:'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -65,8 +65,11 @@
 - `sidebar.js`는 날짜를 `YYYY-MM-DD` 접두만 표시(`it.date.match(/^\d{4}-\d{2}-\d{2}/)`)하고 `label`이 있으면 ` (label)`을 덧붙인다. `label`이 달린 변형은 목록 최상단이어도 `/`가 아니라 자기 아카이브 페이지로 링크된다.
 - 루틴은 자동 생성 항목에 `label`을 붙이지 않으며, **수동 `label` 항목은 보존**한다 (manifest STEP 9 정책).
 
-## 알림 파이프라인
-`notify.yml`: **22:30 UTC (07:30 KST)** 매일. `notify.py`가 manifest 최신 항목(날짜+headline)을 읽어 카카오톡(나에게 보내기) + Gmail HTML 메일을 발송. 카카오 refresh_token이 rotate되면 `ADMIN_PAT`로 GitHub Secret을 자동 갱신.
+## 알림 파이프라인 (이벤트 기반 — 2026-06-05 변경)
+`notify.yml`은 **cron이 아니라 `workflow_run`(배포 완료) 이벤트**로 발송된다. `notify.py`가 세 manifest(경쟁사+AI+FSC) 최신 항목(날짜+headline)을 읽어 카카오톡(나에게 보내기) + Gmail HTML 메일을 1통에 세 섹션으로 발송. 카카오 refresh_token이 rotate되면 `ADMIN_PAT`로 GitHub Secret을 자동 갱신.
+- **트리거**: "Deploy to Netlify" 워크플로가 성공 완료되고, 그 커밋 메시지가 `Daily digest:`로 시작할 때만(=마지막 루틴인 **경쟁사 07:00 KST** 배포). → 사이트가 라이브된 직후 **~07:06 KST 즉시** 발송. AI/FSC/수동 푸시 배포에는 발송 안 함(job-level `if`로 필터, skip). 수동 발송은 `workflow_dispatch`.
+- ⚠️ **왜 cron을 버렸나**: GitHub Actions의 `schedule` 트리거는 부하 시간대에 1~1.5h 지연돼 07:30 예정 알림이 실제론 08:30~09:14 KST에 도착했다(2026-06-05 실측). `workflow_run`은 지연이 거의 없어 배포 직후 발송된다.
+- 경쟁사 루틴은 매일 index.html의 날짜(eyebrow/footer)를 갱신하므로 항상 diff→push→deploy가 발생 → "No changes로 알림 누락" 사실상 없음.
 필요한 **GitHub Secrets**: `NETLIFY_AUTH_TOKEN`, `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `GMAIL_EXTRA_RECIPIENTS`, `ADMIN_PAT`.
 
 ## 작성 컨벤션
