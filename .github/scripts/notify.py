@@ -22,6 +22,8 @@ AI_URL = f"{SITE_URL}/ai/"
 AI_MANIFEST_URL = f"{SITE_URL}/ai/archive/manifest.json"
 FSC_URL = f"{SITE_URL}/fsc/"
 FSC_MANIFEST_URL = f"{SITE_URL}/fsc/archive/manifest.json"
+DZ_URL = f"{SITE_URL}/douzone/"
+DZ_MANIFEST_URL = f"{SITE_URL}/douzone/archive/manifest.json"
 REPO = "coll20/competitor-digest-site"
 
 
@@ -165,6 +167,22 @@ def main():
     except Exception as e:
         print(f"::warning::FSC manifest fetch failed ({e}) — skipping FSC section")
 
+    # 더존비즈온 digest manifest is optional — degrade gracefully if missing/empty.
+    dz = None
+    try:
+        dz_manifest = http_get_json(f"{DZ_MANIFEST_URL}?t={int(time.time())}")
+        if dz_manifest:
+            dz_latest = dz_manifest[0]
+            dz = {
+                "date": dz_latest["date"],
+                "headline": dz_latest.get("headline", "(헤드라인 없음)"),
+            }
+            print(f"      Douzone latest: date={dz['date']}  headline={dz['headline']}")
+        else:
+            print("      Douzone manifest empty — skipping Douzone section")
+    except Exception as e:
+        print(f"::warning::Douzone manifest fetch failed ({e}) — skipping Douzone section")
+
     print("[2/4] Refreshing Kakao access token...")
     access_token, new_refresh = refresh_kakao(rest_api_key, refresh_token)
     if new_refresh and new_refresh != refresh_token:
@@ -198,6 +216,11 @@ def main():
             f"\n\n────────────\n🏛️ {fsc['date']} 금융위원회 동향\n\n"
             f"{fsc['headline']}\n\n🔗 {FSC_URL}"
         )
+    if dz:
+        kakao_text += (
+            f"\n\n────────────\n🏢 {dz['date']} 더존비즈온 동향\n\n"
+            f"{dz['headline']}\n\n🔗 {DZ_URL}"
+        )
 
     # ---- Build Gmail (one mail, multiple sections) ----
     sections = ["경쟁사"]
@@ -205,6 +228,8 @@ def main():
         sections.append("AI 기술 동향")
     if fsc:
         sections.append("금융위 동향")
+    if dz:
+        sections.append("더존비즈온")
     if len(sections) > 1:
         gmail_subject = f"[데일리 다이제스트] {date} " + " + ".join(sections)
     else:
@@ -238,6 +263,20 @@ def main():
       </a>
     </p>"""
 
+    dz_section = ""
+    if dz:
+        dz_section = f"""
+    <p style="color:#888;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:28px 0 8px;">DOUZONE GROUP INTEL</p>
+    <h2 style="margin:0 0 16px;font-size:22px;color:#e11d48;">🏢 {dz['date']} 더존비즈온 동향</h2>
+    <p style="font-size:16px;color:#333;background:#fff1f2;padding:16px 20px;border-radius:8px;border-left:3px solid #f43f5e;margin:0 0 20px;">
+      {dz['headline']}
+    </p>
+    <p style="margin:0 0 8px;">
+      <a href="{DZ_URL}" style="display:inline-block;background:linear-gradient(135deg,#f43f5e,#fb923c);color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
+        🔗 더존 다이제스트 열기
+      </a>
+    </p>"""
+
     gmail_html = f"""<!DOCTYPE html>
 <html><body style="font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;line-height:1.6;color:#222;background:#f5f5f7;margin:0;padding:24px;">
   <div style="max-width:560px;margin:0 auto;background:white;border-radius:12px;padding:32px;">
@@ -250,12 +289,13 @@ def main():
       <a href="{SITE_URL}" style="display:inline-block;background:linear-gradient(135deg,#6ea8ff,#b794ff);color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
         🔗 경쟁사 다이제스트 열기
       </a>
-    </p>{ai_section}{fsc_section}
+    </p>{ai_section}{fsc_section}{dz_section}
     <p style="font-size:12px;color:#999;margin:32px 0 0;border-top:1px solid #eee;padding-top:16px;">
       매일 KST 자동 수집 → 카카오톡·이메일 동시 발송<br>
       경쟁사: <a href="{SITE_URL}" style="color:#6ea8ff;">{SITE_URL}</a><br>
       AI 동향: <a href="{AI_URL}" style="color:#2dd4bf;">{AI_URL}</a><br>
-      금융위: <a href="{FSC_URL}" style="color:#b8860b;">{FSC_URL}</a>
+      금융위: <a href="{FSC_URL}" style="color:#b8860b;">{FSC_URL}</a><br>
+      더존비즈온: <a href="{DZ_URL}" style="color:#f43f5e;">{DZ_URL}</a>
     </p>
   </div>
 </body></html>"""

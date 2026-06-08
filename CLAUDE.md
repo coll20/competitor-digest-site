@@ -2,7 +2,7 @@
 
 경쟁사 주간 동향 다이제스트 사이트. 한국 신용평가/기업데이터 5개사를 매일 추적하는 **정적 웹사이트**다. 콘텐츠는 사람이 아니라 **스케줄된 원격 Claude 루틴**이 매일 생성·커밋하고, GitHub Actions가 Netlify에 자동 배포한다.
 
-> **이 repo는 세 개의 다이제스트를 호스팅한다.** ① 루트(`/`) = 경쟁사 주간 동향(5개사), ② `/ai` = 글로벌 AI 기술 동향, ③ `/fsc` = 금융위원회(FSC) 동향. 셋 다 같은 Netlify 사이트·deploy.yml·notify 인프라를 공유하며, 각자 별도의 생성 루틴을 가진다. 아래 문서는 주로 경쟁사 다이제스트 기준이며, AI 다이제스트는 **`## AI 기술 동향 다이제스트 (/ai)`**, 금융위 다이제스트는 **`## FSC 동향 다이제스트 (/fsc)`** 섹션 참조.
+> **이 repo는 네 개의 다이제스트를 호스팅한다.** ① 루트(`/`) = 경쟁사 주간 동향(5개사), ② `/ai` = 글로벌 AI 기술 동향, ③ `/fsc` = 금융위원회(FSC) 동향, ④ `/douzone` = 더존비즈온 그룹 동향(핀테크·데이터·AI 중심). 넷 다 같은 Netlify 사이트·deploy.yml·notify 인프라를 공유하며, 각자 별도의 생성 루틴을 가진다. 아래 문서는 주로 경쟁사 다이제스트 기준이며, AI 다이제스트는 **`## AI 기술 동향 다이제스트 (/ai)`**, 금융위 다이제스트는 **`## FSC 동향 다이제스트 (/fsc)`**, 더존 다이제스트는 **`## 더존비즈온 동향 다이제스트 (/douzone)`** 섹션 참조.
 
 ## Live & Infra
 - **Live**: https://competitor-digest-jay-1779945070.netlify.app
@@ -126,7 +126,27 @@
 - **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ 게시판 추가/제거 시 STEP 4 board 목록 + STEP 8 sidebar anchors 동시 수정.
 - ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사/AI 루틴과 동일 토큰). 이 repo에 커밋 금지.
 
+## 더존비즈온 동향 다이제스트 (/douzone)
+**더존비즈온 그룹**(본사 + 계열사)을 **핀테크·기업데이터·AI·신용** 관점으로 매일 모니터링하는 네 번째 다이제스트. 같은 repo·Netlify·deploy·notify 인프라 위에서 `/douzone` 경로로 서빙된다. 더존비즈온은 ERP·세무 데이터 최대 보유사이자 **합작 신용평가사 테크핀레이팅스(더존·신한·SGI서울보증)의 모회사** — 기업데이터·CB 영역의 직접 경쟁자이자 데이터 공급·협력 파트너라는 양면성을 가진다.
+- **Live**: https://competitor-digest-jay-1779945070.netlify.app/douzone/
+- **파일**: `douzone/index.html`(최신), `douzone/archive/<date>.html`(아카이브), `douzone/archive/manifest.json`, `douzone/styles.css`(크림슨/앰버 자체 테마), `douzone/sidebar.js`(`/douzone/archive/manifest.json` fetch, `/douzone/`로 링크).
+- **모니터링 6개 카테고리**: 🏢 실적·경영·전략(biz) · 💳 핀테크·금융(fintech) · 🗄️ 기업데이터·신용(data) · 🤖 AI·신사업(ai) · 🌐 플랫폼·ERP 위하고(platform) · 🤝 계열사·투자·M&A·파트너십(group). 회사 중심이라 경쟁사 다이제스트의 뉴스검색 방식 + AI/FSC의 주제별 섹션 구조를 결합.
+- **생성 루틴 ID**: `trig_01X4BRezpqH5ftebw4NJnPad` (이름: "Daily Douzone (더존비즈온) Digest")
+  - **cron**: `0 19 * * *` (UTC) = **04:00 KST** — FSC(05:00)·AI(06:00)·경쟁사(07:00)보다 먼저 실행해 07:06 알림 전 넷 다 준비. push는 `git pull --rebase` 후 수행(다른 루틴과 충돌 방지).
+  - **model**: `claude-sonnet-4-6`, env `env_012Eb5mv4x1BeWNXF8NxBfz9`(공유).
+- **콘텐츠 구조**: 🎯 오늘의 핵심(TOP 3) → 6개 카테고리 섹션 카드(매체칩 + 원문 인라인 링크 + 2~3문장 자체 요약 + 💡 테크핀 함의) → 💡 **테크핀레이팅스 함의 종합** → 📚 이번 주 누적(recap) → Sources.
+  - 차별점: 경쟁사 루틴과 동일한 **멀티채널 뉴스검색**(회사명+뉴스성 키워드 + 네이버 뉴스 인덱스, 브랜드명 단독검색 금지, blog/cafe 인용 금지) + 배포 직전 STEP 9.5 전 URL 검증 + 모든 항목에 테크핀레이팅스 관점 함의.
+  - ⚠️ **루틴 프롬프트에 박힌 날조방지 사실 3건**: ① 제4 인터넷은행('더존뱅크') 컨소시엄은 2025-03 예비인가 철회로 종료 → "인뱅 인가" 류 가짜 최신성 금지(fintech 섹션은 정직 empty-state 허용). ② 더존비즈온은 2026년 EQT파트너스 공개매수로 완전자회사화·자진 상장폐지(비상장 PE 전환). ③ 테크핀레이팅스=더존 계열사 본인 → '계열사 동향'으로 수록하되 함의는 자사 포지셔닝 관점.
+- **dedup·링크검증**: 전날 더존 아카이브 대비 NEW/ALREADY_COVERED 분류 → recap, 배포 직전 STEP 9.5 전 URL 검증(HTTP 200 + 실제 기사 본문 + 키워드 일치).
+- **알림 통합**: `notify.py`가 네 manifest(`/archive` + `/ai/archive` + `/fsc/archive` + `/douzone/archive`)를 모두 읽어 **1통**에 네 섹션으로 발송. 더존 manifest 없으면 해당 섹션만 생략(graceful).
+- **크로스링크**: 경쟁사·AI·FSC 사이드바에 `/douzone` 행 추가(index + 직전 archive 모두 — 루틴 템플릿 전파용), 더존 사이드바에 `/`·`/ai/`·`/fsc/` 행. 루틴이 전날 아카이브를 템플릿으로 쓰므로 매일 보존·전파됨.
+- **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ 카테고리 추가/제거 시 STEP 8 sidebar anchors + 섹션 순서 동시 수정.
+- ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사/AI/FSC 루틴과 동일 토큰). 이 repo에 커밋 금지.
+
 ## 작업 로그
+- **2026-06-08**:
+  - **더존비즈온 그룹 동향 다이제스트(`/douzone`) 추가** — 4번째 다이제스트. 더존비즈온 본사+계열사를 핀테크·기업데이터·AI·신용 관점으로 모니터링. 6개 주제 카테고리(실적·경영 / 핀테크·금융 / 기업데이터·신용 / AI·신사업 / 플랫폼·ERP / 계열사·투자) + 오늘의 핵심 TOP3 + 테크핀레이팅스 함의 종합. 크림슨/앰버 자체 테마. 창간호 시드 8개 카드(EQT 공개매수·상장폐지, 위하고 AI 에디션, 테크핀레이팅스 월 재무제표, ONE AI 에이전틱, 레플릿 메이커톤, 종소세 교육, EQT 2차 공개매수, 롯데이노베이트 OmniEsol) — 전 항목 etnews/ZDNet 원문 WebFetch 검증. 생성 루틴 `trig_01X4BRezpqH5ftebw4NJnPad`(04:00 KST). `notify.py`를 네 다이제스트 통합 1통 발송으로 확장. 4-way 사이드바 크로스링크.
+  - **리서치 정정사항(루틴 프롬프트에 영구 반영)**: 제4 인터넷은행(더존뱅크) 컨소시엄은 2025-03 철회로 종료(인뱅 인가 류 가짜 최신성 금지) / 더존비즈온은 2026년 EQT 공개매수로 비상장 PE 전환 / 테크핀레이팅스는 더존 핀테크 계열사 본인.
 - **2026-06-05**:
   - **금융위원회(FSC) 동향 다이제스트(`/fsc`) 추가** — 3번째 다이제스트. 금융위 알림마당 9개 게시판(보도자료·보도설명·새소식·금융위/증선위 의결·제재정보·금융시장동향·금융지표·카드뉴스)을 매일 모니터링. 네이비/골드 자체 테마, 게시판별 섹션 + 오늘의 핵심 TOP3 + 업계 함의 종합. 창간호 시드(보도자료 6·보도설명 3·새소식 1·금융위 의결 1·금융시장동향 1 카드, 전 항목 fsc.go.kr 원문 검증). 생성 루틴 `trig_01SryyhJftXg4VH1suEHgeF3`(05:00 KST). `notify.py`를 세 다이제스트 통합 1통 발송으로 확장(경쟁사+AI+금융위). 3-way 사이드바 크로스링크.
 - **2026-06-02**:
