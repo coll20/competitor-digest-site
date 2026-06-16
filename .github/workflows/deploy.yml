@@ -10,6 +10,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # need history to diff changed HTML for the link gate
+
+      # Deterministic citation-link gate. Blocks deploy (and therefore notify, which
+      # depends on a successful deploy) if any NEWLY CHANGED digest page cites a
+      # listing/board-root/search/blog URL instead of a specific article/post.
+      # Only changed *.html are checked, so historical archives never block deploys.
+      # See .github/scripts/verify_links.py and CLAUDE.md.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify citation links (changed pages only)
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            FILES=$(git diff --name-only HEAD~1 HEAD -- '*.html' || true)
+          else
+            FILES=$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- '*.html' || true)
+          fi
+          echo "Changed HTML files: ${FILES:-<none>}"
+          if [ -n "$FILES" ]; then
+            python3 .github/scripts/verify_links.py $FILES
+          else
+            echo "No HTML changes — skipping citation-link check."
+          fi
 
       - uses: actions/setup-node@v4
         with:

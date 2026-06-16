@@ -26,7 +26,8 @@
 - `styles.css` — 다크 테마 스타일
 - `sidebar.js` — 목차/아카이브 목록 렌더 + 모바일 토글
 - `netlify.toml` — `publish="."`, 보안 헤더
-- `.github/workflows/deploy.yml` — push → Netlify 프로덕션 배포
+- `.github/workflows/deploy.yml` — push → (변경된 HTML 인용링크 게이트) → Netlify 프로덕션 배포
+- `.github/scripts/verify_links.py` — 결정론적 인용링크 게이트. 카드/CEO/recap/Sources 인용이 목록·루트·검색·blog URL이면 FAIL → 배포 차단(따라서 notify도 차단). 네비게이션(board-link·sidebar-switch·footer·empty-state)은 예외. 변경된 *.html만 검사.
 - `.github/workflows/notify.yml` + `.github/scripts/notify.py` — 매일 카카오톡 + Gmail 알림
 
 ## 페이지 콘텐츠 구조
@@ -145,6 +146,10 @@
 - ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사/AI/FSC 루틴과 동일 토큰). 이 repo에 커밋 금지.
 
 ## 작업 로그
+- **2026-06-16**:
+  - **인용링크 무결성 사고 + 2중 방어 도입** — 사용자가 FSC 6/16 다이제스트의 "신정법 동의제도 개편 법률자문단 킥오프"(권대영 부위원장) 항목 링크를 눌렀더니 해당 보도자료가 없다고 제보. 진단: **사건 자체는 실제**(머니투데이·뉴스핌·이데일리 6/16 보도)였으나, FSC 루틴이 fsc.go.kr 개별 게시물을 특정 못 하자 **게시판 루트(/no010101, postId 없음)를 source_url로 박았고**, STEP 9.5가 'HTTP 200+키워드 포함'만 봐서(루트도 200·헤드라인 나열로 키워드 포함) 통과시킴. FSC 프롬프트에 board-root 강등 탈출구가 명시돼 있던 게 직접 원인. 경쟁사·AI·더존은 이미 개별기사 URL만 써서 무사(검증으로 확인).
+  - **조치 ① 프롬프트(4개 전부)**: `CITATION URL DOCTRINE`(인용은 개별 기사/게시물만; 목록·루트·검색·홈·blog 금지; 못 구하면 제거/대체, 루트로 때우기 금지; 네비게이션 링크는 예외) 추가 + STEP 9.5를 '내용 일치 검증'(그 페이지가 이 사건을 실제로 다루는가) + `verify_links.py` PASS 필수로 강화. FSC는 board-root 탈출구 삭제 + 개별 게시물 없으면 검증된 언론사 기사로 대체 허용. RemoteTrigger update 4건 200, 임베디드 PAT 보존 확인.
+  - **조치 ② 결정론적 게이트**: `.github/scripts/verify_links.py` 신설(stdlib만, 변경 HTML의 인용링크가 루트/목록/검색/blog면 exit 1). `deploy.yml`에 배포 직전 단계로 연결(변경된 *.html만 검사, fetch-depth:0). FAIL이면 배포 실패→notify도 차단(notify는 배포 성공 종속). LLM이 지시를 건너뛰어도 막히는 하드 가드.
 - **2026-06-09**:
   - **더존 루틴 STEP 4·6 최신성(recency-first) 개편** — 사용자 피드백("기사가 너무 과거 것만 스크랩")으로 시작. 원인: 창간호~초기 자동생성분이 EQT 상폐(2~3월)·퓨리오사AI(2/19)·EY한영(3/31) 등 과거 milestone만 수집(WebSearch가 유명 과거 기사를 상단에 줌). **수정**: STEP 4에 RECENCY-FIRST 블록 신설 — 후보를 보도일자로 `PRIMARY(≤7일)/BACKUP(8~30일)/DISCARD(30일 초과=폐기)` 3분류, 네이버 최신순 상단부터 확보. STEP 6에 카테고리 내 **날짜 내림차순** + **30일 하드캡**(EQT 등 과거 대형 이벤트 카드 금지) + **전체 카드 최소 절반 7일 윈도우 내** 추가. STEP 7/11/QUALITY BAR도 일치. `RemoteTrigger update` 200 확인(임베디드 PAT 보존). 다음 04:00 KST 자동 실행부터 적용.
   - **오늘(6/09) 더존 페이지 수동 갱신** — 수동 `RemoteTrigger run`이 push 안 함(27분 폴링 무반응 → "no changes"/실패 추정) → 직접 WebSearch+서브에이전트(16쿼리)로 발굴·검증 후 페이지 재작성. 가장 오래된 2~3월 카드(EY한영·퓨리오사) 제거→recap 강등, **위하고 AI 에디션(5/21) 전면화** + EQT 6월 일정(6/25 매매정지·6/30 주식교환) + 레플릿 MOU(5/07). URL 12개 전수 HTTP 200 검증 후 push·배포 확인. ⚠️ **6/2~6/9 윈도우 내 신규 보도 객관적 0건**(더존 상장폐지 진행 중 IR 침묵) — 최신이 5/21까지인 건 콘텐츠 자체 한계.
