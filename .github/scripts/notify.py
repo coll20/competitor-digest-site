@@ -6,6 +6,7 @@ Required env vars:
 Optional:
   ADMIN_PAT  — if set, auto-updates KAKAO_REFRESH_TOKEN secret when Kakao rotates it
 """
+import datetime
 import json
 import os
 import smtplib
@@ -16,6 +17,9 @@ import urllib.request
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+KST = datetime.timezone(datetime.timedelta(hours=9))
+TODAY_KST = datetime.datetime.now(KST).strftime("%Y-%m-%d")
+
 SITE_URL = "https://competitor-digest-jay-1779945070.netlify.app"
 MANIFEST_URL = f"{SITE_URL}/archive/manifest.json"
 AI_URL = f"{SITE_URL}/ai/"
@@ -25,6 +29,31 @@ FSC_MANIFEST_URL = f"{SITE_URL}/fsc/archive/manifest.json"
 DZ_URL = f"{SITE_URL}/douzone/"
 DZ_MANIFEST_URL = f"{SITE_URL}/douzone/archive/manifest.json"
 REPO = "coll20/competitor-digest-site"
+
+
+def is_stale(date_str):
+    """A digest section is stale if its latest manifest date isn't today (KST)."""
+    return (date_str or "")[:10] != TODAY_KST
+
+
+def stale_suffix(date_str):
+    """Human-readable freshness flag appended to a stale section's date (else '')."""
+    if is_stale(date_str):
+        mmdd = TODAY_KST[5:]
+        return f" ⚠️ 오늘({mmdd}) 미갱신 · 최신 {date_str}"
+    return ""
+
+
+def stale_html(date_str):
+    """A red freshness banner for a stale Gmail section (else '')."""
+    if is_stale(date_str):
+        return (
+            '<p style="font-size:13px;color:#b91c1c;background:#fef2f2;'
+            'padding:10px 14px;border-radius:8px;border-left:3px solid #ef4444;'
+            f'margin:0 0 12px;">⚠️ 오늘({TODAY_KST}) 분이 아직 생성되지 않았습니다 '
+            f'— 아래는 가장 최근({date_str}) 내용입니다.</p>'
+        )
+    return ""
 
 
 def http_post(url, form, headers=None):
@@ -204,21 +233,36 @@ def main():
     else:
         print("      (refresh_token still valid, no rotation needed)")
 
-    # ---- Build KakaoTalk text (one message, two sections) ----
-    kakao_text = f"📊 {date} 경쟁사 다이제스트\n\n{headline}\n\n🔗 {SITE_URL}"
+    # ---- Freshness summary (header line so a stale day is obvious at a glance) ----
+    stale_sections = []
+    if is_stale(date):
+        stale_sections.append("경쟁사")
+    if ai and is_stale(ai["date"]):
+        stale_sections.append("AI")
+    if fsc and is_stale(fsc["date"]):
+        stale_sections.append("금융위")
+    if dz and is_stale(dz["date"]):
+        stale_sections.append("더존")
+
+    # ---- Build KakaoTalk text (one message, sections with freshness flags) ----
+    if stale_sections:
+        kakao_text = f"⚠️ {TODAY_KST} 다이제스트 — 미갱신: {', '.join(stale_sections)}\n\n"
+    else:
+        kakao_text = ""
+    kakao_text += f"📊 {date} 경쟁사 다이제스트{stale_suffix(date)}\n\n{headline}\n\n🔗 {SITE_URL}"
     if ai:
         kakao_text += (
-            f"\n\n────────────\n🤖 {ai['date']} 글로벌 AI 기술 동향\n\n"
+            f"\n\n────────────\n🤖 {ai['date']} 글로벌 AI 기술 동향{stale_suffix(ai['date'])}\n\n"
             f"{ai['headline']}\n\n🔗 {AI_URL}"
         )
     if fsc:
         kakao_text += (
-            f"\n\n────────────\n🏛️ {fsc['date']} 금융위원회 동향\n\n"
+            f"\n\n────────────\n🏛️ {fsc['date']} 금융위원회 동향{stale_suffix(fsc['date'])}\n\n"
             f"{fsc['headline']}\n\n🔗 {FSC_URL}"
         )
     if dz:
         kakao_text += (
-            f"\n\n────────────\n🏢 {dz['date']} 더존비즈온 동향\n\n"
+            f"\n\n────────────\n🏢 {dz['date']} 더존비즈온 동향{stale_suffix(dz['date'])}\n\n"
             f"{dz['headline']}\n\n🔗 {DZ_URL}"
         )
 
@@ -230,16 +274,20 @@ def main():
         sections.append("금융위 동향")
     if dz:
         sections.append("더존비즈온")
+    warn = "⚠️ " if stale_sections else ""
     if len(sections) > 1:
-        gmail_subject = f"[데일리 다이제스트] {date} " + " + ".join(sections)
+        gmail_subject = f"[데일리 다이제스트] {warn}{TODAY_KST} " + " + ".join(sections)
+        if stale_sections:
+            gmail_subject += f" (미갱신: {', '.join(stale_sections)})"
     else:
-        gmail_subject = f"[경쟁사 다이제스트] {date} — {headline[:60]}"
+        gmail_subject = f"[경쟁사 다이제스트] {warn}{TODAY_KST} — {headline[:60]}"
 
     ai_section = ""
     if ai:
         ai_section = f"""
     <p style="color:#888;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:28px 0 8px;">GLOBAL AI TECH INTEL</p>
     <h2 style="margin:0 0 16px;font-size:22px;color:#0f766e;">🤖 {ai['date']} 글로벌 AI 기술 동향</h2>
+    {stale_html(ai['date'])}
     <p style="font-size:16px;color:#333;background:#ecfdf5;padding:16px 20px;border-radius:8px;border-left:3px solid #2dd4bf;margin:0 0 20px;">
       {ai['headline']}
     </p>
@@ -254,6 +302,7 @@ def main():
         fsc_section = f"""
     <p style="color:#888;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:28px 0 8px;">FSC REGULATORY WATCH</p>
     <h2 style="margin:0 0 16px;font-size:22px;color:#b8860b;">🏛️ {fsc['date']} 금융위원회 동향</h2>
+    {stale_html(fsc['date'])}
     <p style="font-size:16px;color:#333;background:#fdf6e3;padding:16px 20px;border-radius:8px;border-left:3px solid #e3b341;margin:0 0 20px;">
       {fsc['headline']}
     </p>
@@ -268,6 +317,7 @@ def main():
         dz_section = f"""
     <p style="color:#888;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:28px 0 8px;">DOUZONE GROUP INTEL</p>
     <h2 style="margin:0 0 16px;font-size:22px;color:#e11d48;">🏢 {dz['date']} 더존비즈온 동향</h2>
+    {stale_html(dz['date'])}
     <p style="font-size:16px;color:#333;background:#fff1f2;padding:16px 20px;border-radius:8px;border-left:3px solid #f43f5e;margin:0 0 20px;">
       {dz['headline']}
     </p>
@@ -282,6 +332,7 @@ def main():
   <div style="max-width:560px;margin:0 auto;background:white;border-radius:12px;padding:32px;">
     <p style="color:#888;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 8px;">COMPETITIVE INTELLIGENCE</p>
     <h2 style="margin:0 0 16px;font-size:22px;color:#1a1a2e;">📊 {date} 경쟁사 다이제스트</h2>
+    {stale_html(date)}
     <p style="font-size:16px;color:#333;background:#f0f4ff;padding:16px 20px;border-radius:8px;border-left:3px solid #6ea8ff;margin:0 0 20px;">
       {headline}
     </p>

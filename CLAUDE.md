@@ -71,6 +71,7 @@
 - **트리거**: "Deploy to Netlify" 워크플로가 성공 완료되고, 그 커밋 메시지가 `Daily digest:`로 시작할 때만(=마지막 루틴인 **경쟁사 07:00 KST** 배포). → 사이트가 라이브된 직후 **~07:06 KST 즉시** 발송. AI/FSC/수동 푸시 배포에는 발송 안 함(job-level `if`로 필터, skip). 수동 발송은 `workflow_dispatch`.
 - ⚠️ **왜 cron을 버렸나**: GitHub Actions의 `schedule` 트리거는 부하 시간대에 1~1.5h 지연돼 07:30 예정 알림이 실제론 08:30~09:14 KST에 도착했다(2026-06-05 실측). `workflow_run`은 지연이 거의 없어 배포 직후 발송된다.
 - 경쟁사 루틴은 매일 index.html의 날짜(eyebrow/footer)를 갱신하므로 항상 diff→push→deploy가 발생 → "No changes로 알림 누락" 사실상 없음.
+- **신선도 가드 (2026-06-28)**: `notify.py`는 각 섹션 manifest 최신 date를 오늘(KST)과 대조해, 미갱신이면 카카오 상단에 `⚠️ {today} 다이제스트 — 미갱신: …` 요약 + 섹션 날짜 뒤 `⚠️ 오늘(MM-DD) 미갱신 · 최신 X`, Gmail엔 섹션별 빨간 배너를 붙여 발송한다(어제 내용을 오늘 것처럼 보내는 staleness 방지). 신선한 섹션은 깔끔히. 제목 날짜도 today(KST) 기준.
 필요한 **GitHub Secrets**: `NETLIFY_AUTH_TOKEN`, `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `GMAIL_EXTRA_RECIPIENTS`, `ADMIN_PAT`.
 
 ## 작성 컨벤션
@@ -146,6 +147,13 @@
 - ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사/AI/FSC 루틴과 동일 토큰). 이 repo에 커밋 금지.
 
 ## 작업 로그
+- **2026-06-28**:
+  - **생성 누락 근본원인 발견 + 4대 조치** — 사용자가 "요 며칠 생성이 안 되고, 카카오 요약에 할루시네이션" 제보. 진단: 4개 루틴 cron은 정상 fire되나(전부 06-27 last_fired) GitHub HEAD는 06-26 사람 커밋에서 멈춤=루틴이 돌아도 push가 안 됨. **스모킹 건 = `git push origin main 2>&1 | tail -3`** — 파이프가 push 종료코드를 `tail`의 0(성공)으로 덮어써, push 거부(non-fast-forward)돼도 에이전트가 "✅ Pushed"로 거짓 보고하고 4개 모두 실패를 소리없이 삼킴(나머지 3개의 `|| rebase` fallback도 `| tail` 때문에 영원히 미실행). PAT는 유효(GitHub API 200), 토큰 문제 아님. "할루시네이션"은 notify.py가 manifest headline을 날짜검증 없이 발송 → 생성 실패 시 어제 내용을 오늘 것처럼 재발송(staleness)이 주원인.
+    - **조치 ① notify.py 신선도 가드**: 오늘(KST) ≠ 섹션 최신날짜면 카카오·Gmail에 `⚠️ 오늘(MM-DD) 미갱신 · 최신 X` 플래그 후 발송(상단 요약 라인 + Gmail 빨간 배너). 제목 날짜도 today 기준. (사용자 선택: 플래그 후 발송)
+    - **조치 ② 4개 루틴 push 하드닝**: STEP 10을 `set -o pipefail` + push 재시도 루프(5회, 실패 시 fetch+rebase 후 재시도, 끝내 실패면 `❌ PUSH_FAILED`로 명확 보고·✅ 금지)로 교체. `| tail` 제거(종료코드 보존). NO_CHANGES도 실패로 간주. 클론 `--depth=1`→`--depth=80`(rebase 안전). RemoteTrigger update 4건 200, PAT 무결성 확인.
+    - **조치 ③ HEADLINE 그라운딩(할루시네이션 금지)**: 4개 프롬프트에 'manifest headline은 실제 게재·검증 통과한 카드 사실만으로 구성, 카드에 없는 수치·고유명사 신설 금지, 신규 0건이면 정직히 표기' 규칙 추가.
+    - **조치 ④ 백스톱 캐치업 루틴 신설**: `trig_01WSBKxd6rgFkmcjtd2a71xH` (이름 "Daily Digest Backstop (08:00 KST 누락 보충)"), cron `0 23 * * *`=**08:00 KST**(1차 4개 루틴 04~07시 뒤). 4개 manifest 점검해 오늘치 누락 digest만 전날 archive 템플릿으로 보충 생성·하드닝 push. 경쟁사 보충 시 그 push가 deploy→notify 자동 트리거. 정상인 날은 무동작. model `claude-sonnet-4-6`, env 공유, PAT 임베드(다른 루틴과 동일).
+  - **방어선 요약**: 1차 루틴(04~07 KST, 하드닝 push) → ~07:06 notify(신선도 플래그) → 08:00 백스톱(누락 보충+필요시 notify 재발화) → 09:00 check-digests 워치독(이메일 경보).
 - **2026-06-16**:
   - **인용링크 무결성 사고 + 2중 방어 도입** — 사용자가 FSC 6/16 다이제스트의 "신정법 동의제도 개편 법률자문단 킥오프"(권대영 부위원장) 항목 링크를 눌렀더니 해당 보도자료가 없다고 제보. 진단: **사건 자체는 실제**(머니투데이·뉴스핌·이데일리 6/16 보도)였으나, FSC 루틴이 fsc.go.kr 개별 게시물을 특정 못 하자 **게시판 루트(/no010101, postId 없음)를 source_url로 박았고**, STEP 9.5가 'HTTP 200+키워드 포함'만 봐서(루트도 200·헤드라인 나열로 키워드 포함) 통과시킴. FSC 프롬프트에 board-root 강등 탈출구가 명시돼 있던 게 직접 원인. 경쟁사·AI·더존은 이미 개별기사 URL만 써서 무사(검증으로 확인).
   - **조치 ① 프롬프트(4개 전부)**: `CITATION URL DOCTRINE`(인용은 개별 기사/게시물만; 목록·루트·검색·홈·blog 금지; 못 구하면 제거/대체, 루트로 때우기 금지; 네비게이션 링크는 예외) 추가 + STEP 9.5를 '내용 일치 검증'(그 페이지가 이 사건을 실제로 다루는가) + `verify_links.py` PASS 필수로 강화. FSC는 board-root 탈출구 삭제 + 개별 게시물 없으면 검증된 언론사 기사로 대체 허용. RemoteTrigger update 4건 200, 임베디드 PAT 보존 확인.
