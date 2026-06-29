@@ -252,9 +252,13 @@ already split into NEW (not in yesterday's digest) and ALREADY_COVERED.
 
 Write a daily digest in KOREAN. Rules:
 - Use ONLY the urls present in the provided candidates. NEVER invent or modify a URL.
-- NEW items become company cards (summary 2-3 sentences, impact 1 sentence, action 1 sentence).
+- SELECTION (중요): 후보가 많아도 '진짜 뉴스가치 있는' 항목만 카드로. 회사당 최대 3~4개, 전체 최대 15개.
+  같은 사건을 여러 매체가 보도하면 1개 카드로 합치고 가장 신뢰도 높은 URL 1개만 쓴다. 회사의 자체 행보
+  (출시·제휴·MOU·신사업·수주·실적·인사·수상·투자)를 우선하고, 제3자 기업에 대한 루틴 등급평정 기사는
+  전략적으로 특기할 만한 경우만 포함. 단순 주가 시세·스침 언급은 제외.
+- 선택한 NEW 항목만 company 카드 (summary 2-3 sentences, impact 1 sentence, action 1 sentence).
   impact_class: threat (competitor gains) / opportunity / neutral.
-- If a company has zero NEW candidates, produce NO card for it (the renderer shows an honest empty-state).
+- If a company has zero selected NEW candidates, produce NO card for it (renderer shows honest empty-state).
 - ceo_top3: the 3 most strategically important items for our CEO. Prefer NEW; if fewer than 3 NEW exist,
   fill from ALREADY_COVERED and set cumulative=true for those.
 - recap: 1-line summaries of the ALREADY_COVERED items (the running weekly pool). Max 15.
