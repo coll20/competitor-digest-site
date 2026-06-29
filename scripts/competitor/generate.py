@@ -103,6 +103,7 @@ def gather_candidates(company, cfg, creds):
     cid, csec = creds
     today = dt.datetime.strptime(today_str(), "%Y-%m-%d").replace(tzinfo=KST)
     window_start = today - dt.timedelta(days=cfg["window_days"])
+    match = [m.lower() for m in company.get("match", [])]
     seen, cands = set(), []
     for q in company["queries"]:
         try:
@@ -117,6 +118,11 @@ def gather_candidates(company, cfg, creds):
             host = urllib.parse.urlsplit(u).netloc.lower()
             if any(b in host for b in BLOCKED_HOSTS):
                 continue
+            # relevance: company name must appear in title or description (drops keyword noise)
+            if match:
+                hay = (it["title"] + " " + it["desc"]).lower()
+                if not any(m in hay for m in match):
+                    continue
             pub = parse_pub(it["pubDate"])
             if pub and pub < window_start:
                 continue
