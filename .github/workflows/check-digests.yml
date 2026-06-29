@@ -2,7 +2,7 @@ name: Check Digest Freshness
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 09:00 KST (= 00:00 UTC)
+    - cron: '50 22 * * *'  # 07:50 KST (= 22:50 UTC) — 경쟁사 07:00 생성·notify 직후 점검
   workflow_dispatch:
 
 jobs:

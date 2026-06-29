@@ -31,8 +31,15 @@ POST_RE = re.compile(r'href="(/no\d+/(\d+))[^"]*"\s+title="([^"]*)"')
 DAY_RE = re.compile(r'class="day">\s*(\d{4}-\d{2}-\d{2})')
 
 
+def board_link(board):
+    """External link for the '게시판 전체 ↗' nav (absolute board_url override, else fsc.go.kr+path)."""
+    return board.get("board_url") or (FSC + board["path"])
+
+
 def fetch_board(board, window_start, today):
     """Parse a board list page → [{board_id, board_name, url, post_id, title, date}] within window."""
+    if board.get("fetch") is False:   # external board (e.g. 제재정보=금감원) — link only, no scrape
+        return []
     url = FSC + board["path"]
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (digest)"})
@@ -157,13 +164,13 @@ def render_page(today, data, boards, archived):
       </article>
 '''
         if not body:
-            body = f'      <div class="empty-state">이번 윈도우 내 신규 게시물 미확인. 최신: <a href="{FSC}{b["path"]}" target="_blank" rel="noopener">{esc(b["name"])} 게시판 ↗</a></div>\n'
+            body = f'      <div class="empty-state">이번 윈도우 내 신규 게시물 미확인. 최신: <a href="{board_link(b)}" target="_blank" rel="noopener">{esc(b["name"])} 게시판 ↗</a></div>\n'
         sections += f'''    <section id="{b["id"]}" class="company">
       <div class="company-head">
         <span class="company-num">{b["emoji"]}</span>
         <h2 class="company-name">{esc(b["name"])}</h2>
         <span class="company-sub">{esc(b["sub"])}</span>
-        <a class="board-link" href="{FSC}{b["path"]}" target="_blank" rel="noopener">게시판 전체 ↗</a>
+        <a class="board-link" href="{board_link(b)}" target="_blank" rel="noopener">게시판 전체 ↗</a>
       </div>
 {body}    </section>
 

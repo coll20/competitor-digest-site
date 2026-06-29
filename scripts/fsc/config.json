@@ -7,7 +7,7 @@
     {"id": "news",         "emoji": "📢", "name": "새소식",         "sub": "위원회 동정·실적·행사",       "path": "/no010105"},
     {"id": "fsc-decision", "emoji": "🏛️", "name": "금융위 의결정보", "sub": "금융위 회의결과·의사록·제재안건", "path": "/no020101"},
     {"id": "sfc-decision", "emoji": "⚖️", "name": "증선위 의결정보", "sub": "증권선물위원회 의결·회계제재",  "path": "/no020102"},
-    {"id": "sanction",     "emoji": "🚫", "name": "제재정보",       "sub": "금융기관·임직원 제재 내역",     "path": "/no020103"},
+    {"id": "sanction",     "emoji": "🚫", "name": "제재정보",       "sub": "금융기관·임직원 제재 내역 (금융감독원 회계감리 제재)", "path": "/no020103", "board_url": "https://www.fss.or.kr/fss/job/accnutAdtorInfo/list.do?acntnWrkCode=01&menuNo=200732", "fetch": false},
     {"id": "market",       "emoji": "📈", "name": "금융시장동향",   "sub": "일일 국내외 금융시장 브리프",   "path": "/no030101"},
     {"id": "indicator",    "emoji": "📊", "name": "금융지표",       "sub": "주요 금융지표 통계",           "path": "/no030102"},
     {"id": "cardnews",     "emoji": "🎴", "name": "카드뉴스",       "sub": "정책 홍보 카드뉴스",           "path": "/no040101"}
