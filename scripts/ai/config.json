@@ -1,0 +1,20 @@
+{
+  "_comment": "글로벌 AI 다이제스트. 영문 테크/금융 매체 RSS에서 최근 기사 수집(키 불필요, 실제 기사 URL) → OpenAI가 5영역 분류·작성 + 한글 상세. window 7일.",
+  "window_days": 7,
+  "feeds": [
+    "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "https://venturebeat.com/category/ai/feed/",
+    "https://www.theverge.com/rss/index.xml",
+    "https://arstechnica.com/ai/feed/",
+    "https://www.pymnts.com/category/artificial-intelligence/feed/",
+    "https://fintech.global/feed/",
+    "https://the-decoder.com/feed/"
+  ],
+  "areas": [
+    {"id": "frontier", "emoji": "🌐", "name": "프론티어 모델 & 빅테크"},
+    {"id": "infra",    "emoji": "🔧", "name": "인프라 · 반도체 · 컴퓨트"},
+    {"id": "agents",   "emoji": "🧩", "name": "에이전트 · 오픈소스 · 개발"},
+    {"id": "finance",  "emoji": "🏦", "name": "금융 · 신용 · 핀테크 AI"},
+    {"id": "policy",   "emoji": "📜", "name": "정책 · 규제 · 거버넌스"}
+  ]
+}

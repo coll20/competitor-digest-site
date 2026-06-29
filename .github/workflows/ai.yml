@@ -1,0 +1,51 @@
+name: Generate AI Digest (OpenAI)
+
+# 글로벌 AI 다이제스트 — 영문 RSS 수집 → dedup → OpenAI(5영역 분류·작성+한글상세) →
+# 렌더(archive+index+ko) → verify_links → ADMIN_PAT push. (Naver 불필요)
+# ⚠️ 파일럿 중 cron 비활성. 검증되면 schedule 주석 해제 + 옛 AI 루틴 폐기.
+
+on:
+  # schedule:
+  #   - cron: "0 21 * * *"      # 06:00 KST
+  workflow_dispatch:
+
+concurrency:
+  group: ai-generate
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ADMIN_PAT }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet openai
+      - name: Generate
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: python scripts/ai/generate.py
+      - name: Citation-link gate
+        run: |
+          TODAY=$(TZ='Asia/Seoul' date +%Y-%m-%d)
+          python .github/scripts/verify_links.py "ai/archive/${TODAY}.html" ai/index.html "ai/archive/${TODAY}-ko.html"
+      - name: Commit & push
+        run: |
+          set -o pipefail
+          TODAY=$(TZ='Asia/Seoul' date +%Y-%m-%d)
+          git config user.name "AI Digest Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then echo "❌ NO_CHANGES"; exit 1; fi
+          git commit -m "Daily AI digest: ${TODAY}"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then echo "✅ PUSH_OK ($i)"; exit 0; fi
+            git fetch origin main && git rebase origin/main || git rebase --abort || true
+            sleep 4
+          done
+          echo "❌ PUSH_FAILED"; exit 1
