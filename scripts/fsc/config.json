@@ -1,0 +1,15 @@
+{
+  "_comment": "금융위(FSC) 알림마당 9개 게시판을 fsc.go.kr에서 직접 수집. 게시판 목록 페이지의 <li> 블록에서 게시물 id·title·date 추출. 원문(fsc.go.kr/noXXXX/{id}) 직접 링크가 핵심 가치.",
+  "window_days": 7,
+  "boards": [
+    {"id": "press",        "emoji": "📰", "name": "보도자료",       "sub": "위원회 공식 발표문",         "path": "/no010101"},
+    {"id": "explain",      "emoji": "🗣️", "name": "보도설명·해명",   "sub": "언론 보도에 대한 위원회 입장", "path": "/no010102"},
+    {"id": "news",         "emoji": "📢", "name": "새소식",         "sub": "위원회 동정·실적·행사",       "path": "/no010105"},
+    {"id": "fsc-decision", "emoji": "🏛️", "name": "금융위 의결정보", "sub": "금융위 회의결과·의사록·제재안건", "path": "/no020101"},
+    {"id": "sfc-decision", "emoji": "⚖️", "name": "증선위 의결정보", "sub": "증권선물위원회 의결·회계제재",  "path": "/no020102"},
+    {"id": "sanction",     "emoji": "🚫", "name": "제재정보",       "sub": "금융기관·임직원 제재 내역",     "path": "/no020103"},
+    {"id": "market",       "emoji": "📈", "name": "금융시장동향",   "sub": "일일 국내외 금융시장 브리프",   "path": "/no030101"},
+    {"id": "indicator",    "emoji": "📊", "name": "금융지표",       "sub": "주요 금융지표 통계",           "path": "/no030102"},
+    {"id": "cardnews",     "emoji": "🎴", "name": "카드뉴스",       "sub": "정책 홍보 카드뉴스",           "path": "/no040101"}
+  ]
+}
