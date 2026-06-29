@@ -1,0 +1,77 @@
+name: Generate Competitor Digest (OpenAI)
+
+# 경쟁사 다이제스트를 결정론적 파이프라인으로 생성한다 (Anthropic 루틴 대체).
+#  Naver News API로 기사 수집 → URL 검증 → 전일 대비 dedup → OpenAI 작성 →
+#  템플릿 렌더 → verify_links 게이트 → commit/push("Daily digest:" → deploy → notify).
+#
+# ⚠️ push는 ADMIN_PAT로 한다. 기본 GITHUB_TOKEN으로 push하면 deploy.yml/notify.yml이
+#    트리거되지 않는다(GitHub의 재귀 워크플로 방지). PAT push는 정상 트리거된다.
+
+on:
+  # ⚠️ 파일럿 중에는 cron 비활성(기존 Anthropic 경쟁사 루틴과 07:00 KST 충돌 방지).
+  #    수동(workflow_dispatch)으로 며칠 검증 → 검증되면 아래 schedule 주석 해제 + 옛 루틴 폐기.
+  # schedule:
+  #   - cron: "0 22 * * *"      # 07:00 KST
+  workflow_dispatch:
+    inputs:
+      no_openai:
+        description: "OpenAI 건너뛰고 empty-state로 생성 (디버그)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: competitor-generate
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with PAT so push triggers deploy/notify)
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ADMIN_PAT }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install --quiet openai
+
+      - name: Generate digest
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.no_openai }}" = "true" ]; then ARGS="--no-openai"; fi
+          python scripts/competitor/generate.py $ARGS
+
+      - name: Citation-link gate (must pass before commit)
+        run: |
+          TODAY=$(TZ='Asia/Seoul' date +%Y-%m-%d)
+          python .github/scripts/verify_links.py "archive/${TODAY}.html" index.html
+
+      - name: Commit & push (retry on non-fast-forward)
+        run: |
+          set -o pipefail
+          TODAY=$(TZ='Asia/Seoul' date +%Y-%m-%d)
+          git config user.name "Competitor Digest Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "❌ NO_CHANGES — generation produced nothing; failing loudly."
+            exit 1
+          fi
+          git commit -m "Daily digest: ${TODAY}"
+          for i in 1 2 3 4 5; do
+            if git push origin HEAD:main; then echo "✅ PUSH_OK (attempt $i)"; exit 0; fi
+            echo "⚠️ push attempt $i rejected — resync & retry"
+            git fetch origin main && git rebase origin/main || git rebase --abort || true
+            sleep 4
+          done
+          echo "❌ PUSH_FAILED after 5 attempts"; exit 1
