@@ -8,10 +8,8 @@ name: Generate Competitor Digest (OpenAI)
 #    트리거되지 않는다(GitHub의 재귀 워크플로 방지). PAT push는 정상 트리거된다.
 
 on:
-  # ⚠️ 파일럿 중에는 cron 비활성(기존 Anthropic 경쟁사 루틴과 07:00 KST 충돌 방지).
-  #    수동(workflow_dispatch)으로 며칠 검증 → 검증되면 아래 schedule 주석 해제 + 옛 루틴 폐기.
-  # schedule:
-  #   - cron: "0 22 * * *"      # 07:00 KST
+  schedule:
+    - cron: "0 22 * * *"      # 07:00 KST (마지막 — 배포 시 notify 트리거)
   workflow_dispatch:
     inputs:
       no_openai:

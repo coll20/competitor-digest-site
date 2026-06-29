@@ -5,8 +5,8 @@ name: Generate Douzone Digest (OpenAI)
 # ⚠️ 파일럿 중 cron 비활성. 검증되면 schedule 주석 해제 + 옛 더존 루틴 폐기.
 
 on:
-  # schedule:
-  #   - cron: "0 19 * * *"      # 04:00 KST
+  schedule:
+    - cron: "0 19 * * *"      # 04:00 KST
   workflow_dispatch:
 
 concurrency:
