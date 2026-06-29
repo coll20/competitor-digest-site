@@ -1,187 +1,143 @@
 # CLAUDE.md
 
-경쟁사 주간 동향 다이제스트 사이트. 한국 신용평가/기업데이터 5개사를 매일 추적하는 **정적 웹사이트**다. 콘텐츠는 사람이 아니라 **스케줄된 원격 Claude 루틴**이 매일 생성·커밋하고, GitHub Actions가 Netlify에 자동 배포한다.
+네 개의 일일 다이제스트를 호스팅하는 **정적 웹사이트 + 자동 생성 파이프라인**.
+콘텐츠는 매일 **GitHub Actions에서 도는 Python 스크립트**가 생성한다 — 결정론적으로 뉴스를 수집하고
+**OpenAI API**로 한국어 다이제스트를 작성한 뒤, GitHub에 push하면 GitHub Actions가 Netlify에 자동 배포한다.
 
-> **이 repo는 네 개의 다이제스트를 호스팅한다.** ① 루트(`/`) = 경쟁사 주간 동향(5개사), ② `/ai` = 글로벌 AI 기술 동향, ③ `/fsc` = 금융위원회(FSC) 동향, ④ `/douzone` = 더존비즈온 그룹 동향(핀테크·데이터·AI 중심). 넷 다 같은 Netlify 사이트·deploy.yml·notify 인프라를 공유하며, 각자 별도의 생성 루틴을 가진다. 아래 문서는 주로 경쟁사 다이제스트 기준이며, AI 다이제스트는 **`## AI 기술 동향 다이제스트 (/ai)`**, 금융위 다이제스트는 **`## FSC 동향 다이제스트 (/fsc)`**, 더존 다이제스트는 **`## 더존비즈온 동향 다이제스트 (/douzone)`** 섹션 참조.
+> **이 repo는 네 개의 다이제스트를 호스팅한다.** ① 루트(`/`) = 경쟁사(한국 신용평가/데이터 5개사),
+> ② `/ai` = 글로벌 AI 기술 동향, ③ `/fsc` = 금융위원회(FSC) 동향, ④ `/douzone` = 더존비즈온 그룹 동향.
+> 넷 다 같은 Netlify 사이트·`deploy.yml`·notify 인프라를 공유하고, 각자 **별도의 GitHub Actions 워크플로 + 생성 스크립트**를 가진다.
+
+> ⚠️ **2026-06-29 전면 리팩토링.** 과거에는 Anthropic "routine"(클라우드 스케줄 에이전트)이 생성했으나,
+> 조용한 실패(로그 없음)·할루시네이션 문제로 **전부 GitHub Actions + OpenAI 파이프라인으로 교체**했다.
+> 옛 Anthropic 루틴 5개(생성 4 + 백스톱)는 모두 `enabled:false`로 비활성화됨. 아래는 전부 **새 구조** 기준이다.
 
 ## Live & Infra
 - **Live**: https://competitor-digest-jay-1779945070.netlify.app
 - **Repo**: https://github.com/coll20/competitor-digest-site (branch: `main`)
 - **Netlify site id**: `5d37f5df-c388-4d99-916e-ec7f44e5e666`
-- **Stack**: 순수 HTML/CSS/Vanilla JS (빌드 단계 없음). 알림은 Python, 자동화는 GitHub Actions.
+- **Stack**: 정적 HTML/CSS/Vanilla JS(빌드 없음) + 생성/알림은 Python, 자동화는 GitHub Actions.
+- **로컬 클론**: `/home/jaykwon/projects/33rd-agent/digest-site`
 
-## Target companies (5)
-| id | 회사 | num | subtitle |
-|----|------|-----|----------|
-| nice | NICE신용평가 / NICE평가정보 | 01 | NICE 그룹 |
-| kodata | 한국평가데이터 (KODATA) | 02 | 구 한국기업데이터(KED) |
-| kcb | KCB (코리아크레딧뷰로) | 03 | — |
-| kcs | 한국평가정보 (KCS) | 04 | 국내 최초 전업 개인사업자 CB |
-| ecredible | 이크레더블 (eCredible) | 05 | Fitch / 한국기업평가 자회사 |
+## 일일 타임라인 (전부 GitHub Actions cron)
+```
+04:00 KST  douzone.yml    → scripts/douzone/generate.py   (Naver 뉴스)
+05:00 KST  fsc.yml        → scripts/fsc/generate.py       (fsc.go.kr 게시판 직접)
+06:00 KST  ai.yml         → scripts/ai/generate.py        (영문 RSS 피드)
+07:00 KST  competitor.yml → scripts/competitor/generate.py(Naver 뉴스)
+              └ 각자: 수집 → URL검증 → 전일 대비 dedup → OpenAI 작성 → 템플릿 렌더
+                → verify_links 게이트 → ADMIN_PAT로 push("Daily ... digest: <date>")
+              ↓ (push가 deploy.yml 트리거)
+           deploy.yml → Netlify 배포 (~1.5분, 변경 HTML에 verify_links 게이트)
+              ↓ (경쟁사 "Daily digest:" 배포 성공 시에만)
+~07:06 KST notify.yml → 카카오톡 + Gmail (4 manifest 4섹션 1통)
+07:50 KST  check-digests.yml → 4 manifest 신선도 점검, 누락 시 Gmail 경보(워치독)
+```
 
-## File map
-- `index.html` — 최신(LATEST) 다이제스트
-- `archive/<date>.html` — 일자별 아카이브 (예: `archive/2026-05-29.html`)
-- `archive/manifest.json` — 아카이브 인덱스 (사이드바가 읽음)
-- `styles.css` — 다크 테마 스타일
-- `sidebar.js` — 목차/아카이브 목록 렌더 + 모바일 토글
-- `netlify.toml` — `publish="."`, 보안 헤더
-- `.github/workflows/deploy.yml` — push → (변경된 HTML 인용링크 게이트) → Netlify 프로덕션 배포
-- `.github/scripts/verify_links.py` — 결정론적 인용링크 게이트. 카드/CEO/recap/Sources 인용이 목록·루트·검색·blog URL이면 FAIL → 배포 차단(따라서 notify도 차단). 네비게이션(board-link·sidebar-switch·footer·empty-state)은 예외. 변경된 *.html만 검사.
-- `.github/workflows/notify.yml` + `.github/scripts/notify.py` — 매일 카카오톡 + Gmail 알림
+## 생성 파이프라인 (4개 공통 구조)
+**핵심 원칙: LLM은 글쓰기만. URL 발견·검증·HTML 렌더는 전부 결정론적 Python.**
+(이게 옛 루틴의 두 실패 근원 — 할루시네이션·조용한 실패 — 을 제거한다.)
 
-## 페이지 콘텐츠 구조
-1. 🎯 **CEO 5분 브리핑** — TOP-3, urgency 배지(high/midhigh/low) + 한 줄 결론
-2. **회사별 섹션 5개** — NEW 항목만 카드로, 없으면 empty-state
-3. 📚 **이번 주 누적 주요 동향** (recap) — 이전 다이제스트에서 이미 다룬 항목 1줄 요약
-4. **Sources** — 기사 원문 링크 목록
+1. **수집(fetch)** — 디제스트별 소스에서 후보 기사를 결정론적으로 긁는다(아래 소스 표).
+2. **URL 검증(verify)** — 각 후보를 HTTP GET, 200·실기사 본문·홈루트 리다이렉트 아님 확인. blog/cafe/검색 호스트 제외.
+3. **dedup** — 전일 archive의 URL set과 대조 → NEW / ALREADY_COVERED.
+4. **OpenAI 작성** — 검증된 후보만 넘겨 분류·요약·카드·CEO·recap 작성(구조화 JSON, `response_format=json_schema`).
+   넘긴 URL set 안에서만 인용하도록 강제 + 코드가 화이트리스트 밖 URL을 한 번 더 제거(`enforce_url_whitelist`).
+5. **렌더(render)** — JSON을 HTML 템플릿에 끼워넣는다(LLM이 raw HTML을 쓰지 않음 = 마크업 오류 0).
+6. **게이트** — `verify_links.py`로 인용 링크가 개별 기사/게시물인지 결정론 점검(루트/목록/검색/blog면 FAIL).
+7. **commit + push** — 변경 시에만 push(`NO_CHANGES`면 실패). 5회 재시도(rebase). **`ADMIN_PAT`로 push해야**
+   deploy.yml/notify.yml이 트리거된다(기본 `GITHUB_TOKEN` push는 다른 워크플로를 안 깨움).
+
+## 디제스트별 뉴스 소스 & 설정
+| 디제스트 | 경로 | 뉴스 소스 | 설정 파일 | 워크플로 | 커밋 메시지 접두 |
+|---|---|---|---|---|---|
+| 경쟁사 | `/` | 네이버 뉴스 검색 API | `scripts/competitor/companies.json` | `competitor.yml` | `Daily digest:` ← **notify 트리거** |
+| 더존 | `/douzone` | 네이버 뉴스 검색 API | `scripts/douzone/config.json` | `douzone.yml` | `Daily Douzone digest:` |
+| FSC | `/fsc` | fsc.go.kr 9개 게시판 직접 파싱 | `scripts/fsc/config.json` | `fsc.yml` | `Daily FSC digest:` |
+| AI | `/ai` | 영문 테크/금융 RSS 7개 | `scripts/ai/config.json` | `ai.yml` | `Daily AI digest:` |
+
+- **공유 라이브러리**: `scripts/lib/digestlib.py`(naver 수집·verify_url·prev_urls·update_manifest·openai_compose·화이트리스트 가드).
+- **회사/카테고리/게시판/피드 추가·제거는 각 `config.json`만 수정**하면 된다(코드 수정 불필요). 사이드바 앵커도 config 기반 자동 생성.
+- 경쟁사/더존: `match`(회사명 변형) 토큰으로 제목·요약 관련성 필터 → 키워드 노이즈 제거. OpenAI가 추가 선별(카테고리/회사당 ≤3~4, 전체 ≤12~15, 동일사건 통합).
+- FSC: 게시판 목록 페이지의 `<li>` 블록에서 게시물 `id·title·date` 파싱 → 개별 게시물 URL(`fsc.go.kr/noXXXX/{id}`) 인용. 제재정보(sanction)는 금감원(fss.or.kr) 호스팅이라 `fetch:false`+`board_url`로 링크만(스크랩 안 함).
+- AI: RSS(RSS2.0·Atom 모두) 파싱 → 5영역 분류 + 한글 상세 페이지(`ai/archive/<date>-ko.html`, 자체 작성 해설=저작권 안전) + ko 앵커 무결성. finance 영역 최우선.
+
+## 모델 / 비용
+- **모델**: GitHub Secret `OPENAI_MODEL`(현재 `gpt-5.1`). 미설정 시 코드 기본값 `gpt-5.1`. 모델 바꾸려면 이 Secret만 교체.
+- 1회 실행 = 후보 수십~110건(제목+짧은 요약) 입력 + 구조화 출력 1콜. 실제 토큰량은 OpenAI 대시보드 참조.
+
+## 페이지 콘텐츠 구조 (공통)
+1. 🎯 **CEO 5분 브리핑 / 오늘의 핵심** — TOP-3, urgency 배지 + 한 줄 결론
+2. **섹션들** — 경쟁사 5사 / 더존 6카테고리 / FSC 9게시판 / AI 5영역. 신규 없으면 정직 empty-state
+3. (FSC·더존·AI) 💡 **업계/테크핀 함의 종합**
+4. 📚 **이번 주 누적**(recap) — 전일 기수록 항목 1줄 요약
+5. **Sources** — 기사 원문 링크
+6. (AI) 🇰🇷 **한글 상세 페이지** + 각 카드 '한글로 읽기' 버튼
 
 ## 어떻게 수정하나
-정적 파일이라 **GitHub 파일을 고쳐 `main`에 push하면 `deploy.yml`이 ~2분 내 Netlify에 반영**한다 (Netlify를 직접 만질 필요 없음).
-- **일회성 수정**: `index.html` / `archive/*.html` 직접 편집 → commit → push.
-- **영구 수정** (매일 자동 생성분에도 유지돼야 하는 변경): 아래 **생성 루틴** 프롬프트도 함께 고쳐야 한다. 안 그러면 다음 자동 생성분이 덮어쓴다.
+- **콘텐츠 소스 변경**(회사/카테고리/게시판/피드): 해당 `scripts/<name>/config.json`만 수정 → commit → push. 다음 cron부터 적용.
+- **수동 즉시 실행**: `gh workflow run <name>.yml --repo coll20/competitor-digest-site` (예: `competitor.yml`). workflow_dispatch.
+  - 로컬 테스트: `cd digest-site && OPENAI_API_KEY=… NAVER_CLIENT_ID=… NAVER_CLIENT_SECRET=… OPENAI_MODEL=gpt-5.1 python scripts/<name>/generate.py [--dry-run|--no-openai]`. (로컬은 파일만 쓰고 push 안 함. `--dry-run`=수집·검증만, `--no-openai`=빈 empty-state 생성.)
+- **디자인/구조 변경**: 각 `generate.py`의 render 함수(템플릿 문자열) 수정. 또는 공유 CSS(`styles.css`, `ai/styles.css` 등).
+- **스케줄 변경**: 각 워크플로의 `schedule.cron`(UTC). 발송 요일을 바꾸려면 경쟁사 cron을 바꾸면 됨(notify는 경쟁사 배포에 종속).
 
-## 생성 루틴 (매일 자동 생성의 정체)
-매일 오전 7시(KST) 콘텐츠는 **스케줄된 원격 Claude 루틴**이 만든다. 커밋 작성자: `Daily Digest Routine <routine@anthropic.com>`.
-- **루틴 ID**: `trig_01HHXYVgdgB7HToq4SrFaPZk`
-- **cron**: `0 22 * * *` (UTC) = **07:00 KST**
-- **model**: `claude-sonnet-4-6`
-- **동작 흐름**: (STEP 4) 5개사 멀티채널 웹 리서치 → (STEP 5) 전날 아카이브 대비 중복제거 → (STEP 6~8) `index.html` + `archive/<today>.html` 작성(출처 매체 표기 포함) → (STEP 9) `manifest.json` 갱신 → (STEP 9.5) **배포 직전 모든 기사 URL 전수 검증**(HTTP 200 + 실제 기사 본문 + 제목 키워드 일치, 실패 항목 제거) → (STEP 10) `git push`.
-- **STEP 4 검색 채널 (2026-05-30 확장)**: 회사당 후보 기사를 **폭넓게(≥5개 목표, 상한 없음)** 수집한다. 첫 히트에서 멈추지 않는다.
-  - (A) **WebSearch** — 회사당 4~6개 다양한 쿼리(정식명+약칭+영문명+주제어 조합).
-  - (B) **네이버 포털 뉴스 검색 — 필수** — `https://search.naver.com/search.naver?where=news&query={검색어}&sort=1&pd=4` (최신순/최근 1개월). 회사당 최소 2개 검색어(정식명+약칭).
-  - (C) 보조 채널 — Google News, 공식 뉴스룸/보도자료, 상장사 DART 공시.
-  - (D) 후보 URL을 WebFetch로 사실·날짜 확인 후 URL 기준 dedup. 모든 후보에 REAL source_url + 보도일자 기록.
-- **빈 날 방지 fallback (2026-05-30 신설, STEP 6)**: 7일 윈도우 내 신규 0건인 회사는 **최근 8~14일 백업 풀**에서 미보도 항목을 NEW 카드로 노출(`near` 날짜칩). 14일간 정말 아무것도 없을 때만 empty-state. → "전 회사 빈칸" 반복 방지.
-- recap 표시 상한: **최대 15개** (2026-05-30, 기존 10개에서 상향).
-- **핵심**: 루틴은 **전날 아카이브를 구조 템플릿**으로 삼는다 (`Keep ALL structure. Replace ONLY content`). 따라서 오늘 아카이브의 구조를 바꾸면 다음날 생성분에도 자연스럽게 전파된다.
-- **프롬프트 수정 방법** (다른 컴퓨터에서도): Claude Code에서 `/schedule` 스킬 → `RemoteTrigger`(action `get`/`update`)로 이 루틴의 `job_config.ccr.events[].data.message.content`를 편집. 또는 웹 UI: https://claude.ai/code/routines
-  - ⚠️ **update body 스키마 주의**: `events[]` 원소는 `{"data":{"message":{"role":"user","content":"..."}, ...}}` 형식이어야 한다. `event_type` 필드를 넣으면 v2 변환 에러(`unknown field "event_type"`)로 400 거부됨. get으로 받은 구조를 그대로 두고 `content`만 교체할 것. (간헐적으로 첫 update가 400 날 수 있으니 동일 형식으로 1회 재시도.)
-- ⚠️ **보안**: 루틴 프롬프트에 push용 GitHub PAT가 평문으로 들어 있다(2곳: INFRA 안내 + STEP 1 clone 명령). **이 토큰은 이 저장소에 절대 커밋하지 말 것.** 노출이 우려되면 rotate 후 루틴 프롬프트만 갱신.
+## 필요한 GitHub Secrets
+| Secret | 용도 |
+|---|---|
+| `OPENAI_API_KEY` | 4개 생성 스크립트 — OpenAI 작성 |
+| `OPENAI_MODEL` | 모델명(현재 `gpt-5.1`) |
+| `NAVER_CLIENT_ID` / `NAVER_CLIENT_SECRET` | 경쟁사·더존 — 네이버 뉴스 검색 API |
+| `ADMIN_PAT` | 4개 생성 워크플로 checkout/push(이 토큰으로 push해야 deploy/notify 트리거) + notify의 Kakao secret 갱신 |
+| `NETLIFY_AUTH_TOKEN` | deploy.yml — Netlify CLI |
+| `KAKAO_REST_API_KEY` / `KAKAO_REFRESH_TOKEN` | notify.py — 카카오톡 |
+| `GMAIL_USER` / `GMAIL_APP_PASSWORD` / `GMAIL_EXTRA_RECIPIENTS` | notify.py·워치독 — Gmail(BCC 수신자) |
+> ⚠️ 옛 Anthropic 루틴 프롬프트에 평문 GitHub PAT가 박혀 있었으나 이제 루틴이 비활성화돼 무관. 새 파이프라인은 토큰을 GitHub Secret으로만 쓴다.
 
-## 아카이브 네이밍 컨벤션
-- **정규 일자**: `2026-05-29` → `archive/2026-05-29.html`
-- **같은 날 수동 변형**: 날짜에 접미사를 붙이고 `label` 필드로 표기. 예) `2026-05-28-rerun` + `label: "오전 버전"`, `2026-05-29-night` + `label: "밤 버전"`
-- **manifest 항목**: `{date, title, headline, label?}`, `date` 내림차순 정렬, 2-space pretty-print.
-- `sidebar.js`는 날짜를 `YYYY-MM-DD` 접두만 표시(`it.date.match(/^\d{4}-\d{2}-\d{2}/)`)하고 `label`이 있으면 ` (label)`을 덧붙인다. `label`이 달린 변형은 목록 최상단이어도 `/`가 아니라 자기 아카이브 페이지로 링크된다.
-- 루틴은 자동 생성 항목에 `label`을 붙이지 않으며, **수동 `label` 항목은 보존**한다 (manifest STEP 9 정책).
+## 알림 파이프라인 (이벤트 기반)
+`notify.yml`은 cron이 아니라 **`workflow_run`(배포 완료) 이벤트**로 발송된다. `notify.py`가 네 manifest(경쟁사+AI+FSC+더존) 최신 항목을 읽어 카카오톡 + Gmail(To: coll20, BCC: 추가 수신자) 1통 4섹션 발송.
+- **트리거**: "Deploy to Netlify"가 성공하고 그 커밋 메시지가 `Daily digest:`로 시작할 때만(=경쟁사 07:00 배포). → ~07:06 KST 즉시 발송. 다른 digest 커밋(`Daily AI/FSC/Douzone digest:`)·수동 push는 발송 안 함(job-level `if` 필터).
+- **신선도 가드(2026-06-28)**: 섹션 manifest 최신 date ≠ 오늘(KST)이면 카카오·Gmail에 `⚠️ 미갱신` 플래그 후 발송(staleness 방지).
+- Kakao refresh_token rotate 시 `ADMIN_PAT`로 GitHub Secret 자동 갱신.
 
-## 알림 파이프라인 (이벤트 기반 — 2026-06-05 변경)
-`notify.yml`은 **cron이 아니라 `workflow_run`(배포 완료) 이벤트**로 발송된다. `notify.py`가 세 manifest(경쟁사+AI+FSC) 최신 항목(날짜+headline)을 읽어 카카오톡(나에게 보내기) + Gmail HTML 메일을 1통에 세 섹션으로 발송. 카카오 refresh_token이 rotate되면 `ADMIN_PAT`로 GitHub Secret을 자동 갱신.
-- **트리거**: "Deploy to Netlify" 워크플로가 성공 완료되고, 그 커밋 메시지가 `Daily digest:`로 시작할 때만(=마지막 루틴인 **경쟁사 07:00 KST** 배포). → 사이트가 라이브된 직후 **~07:06 KST 즉시** 발송. AI/FSC/수동 푸시 배포에는 발송 안 함(job-level `if`로 필터, skip). 수동 발송은 `workflow_dispatch`.
-- ⚠️ **왜 cron을 버렸나**: GitHub Actions의 `schedule` 트리거는 부하 시간대에 1~1.5h 지연돼 07:30 예정 알림이 실제론 08:30~09:14 KST에 도착했다(2026-06-05 실측). `workflow_run`은 지연이 거의 없어 배포 직후 발송된다.
-- 경쟁사 루틴은 매일 index.html의 날짜(eyebrow/footer)를 갱신하므로 항상 diff→push→deploy가 발생 → "No changes로 알림 누락" 사실상 없음.
-- **신선도 가드 (2026-06-28)**: `notify.py`는 각 섹션 manifest 최신 date를 오늘(KST)과 대조해, 미갱신이면 카카오 상단에 `⚠️ {today} 다이제스트 — 미갱신: …` 요약 + 섹션 날짜 뒤 `⚠️ 오늘(MM-DD) 미갱신 · 최신 X`, Gmail엔 섹션별 빨간 배너를 붙여 발송한다(어제 내용을 오늘 것처럼 보내는 staleness 방지). 신선한 섹션은 깔끔히. 제목 날짜도 today(KST) 기준.
-필요한 **GitHub Secrets**: `NETLIFY_AUTH_TOKEN`, `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `GMAIL_EXTRA_RECIPIENTS`, `ADMIN_PAT`.
+## 결정론적 게이트 — `.github/scripts/verify_links.py`
+인용 링크(카드 제목·CEO·recap·Sources·kr-src·ko-orig)가 목록/루트/검색/blog URL이면 `exit 1`. 네비게이션(board-link·sidebar-switch·ko-btn·footer·empty-state 내부 링크)은 예외. `deploy.yml`이 변경된 *.html에 대해 실행 → FAIL이면 배포 차단(→notify도 차단). 각 `generate.py`도 push 전 자체 실행.
 
-## 작성 컨벤션
-- 사용자 노출 텍스트는 **전부 한국어**.
-- 뉴스 **날조 금지**. Sources에는 실제로 fetch한 URL만 싣는다.
-- 중복 제거는 보수적으로 (애매하면 ALREADY_COVERED로 분류해 recap으로).
-- **본문 인라인 링크 (필수)**: CEO TOP-3 / 회사 카드 / recap 각 항목은 하단 Sources와 별개로 원문 기사 인라인 링크를 가진다.
-  - CEO/카드: 제목 텍스트를 `<a href target="_blank" rel="noopener">`로 감싼다 (`(날짜)` span은 링크 밖).
-  - recap: 사건 요약 문구를 `<a class="recap-link" ...>`로 감싼다.
-  - 스타일은 `styles.css`에 정의됨(`.ceo-body .title a`, `.card-title a`, `a.recap-link`). URL 없으면 링크 생략(날조 금지).
-- **출처 매체 표기 (필수, 2026-05-30)**: 모든 항목에 언론사/매체명을 노출한다.
-  - 카드: 제목 위 `card-meta`에 `<span class="source-chip">{매체명}</span>` + `date-chip`.
-  - CEO TOP-3: 제목 뒤 `<span class="src-tag">{매체명}</span>`.
-  - recap: 끝 span에 `({매체명} · {날짜} 최초 보도)`.
-  - Sources: `{기사 제목} — {매체명}` 형식. 관련 스타일(`.card-meta`/`.source-chip`/`.src-tag`)은 `styles.css`에 정의됨.
-- **링크 무결성 (필수, 2026-05-30)**: 모든 링크는 개별 기사의 완전한 실제 URL만. 검색결과 페이지(`search.naver.com`)·목록 페이지(`korearatings.com/cms` 등 기사 본문 아님)·잘린/플레이스홀더 URL·날조 URL 금지. 배포 직전 전수 검증(아래 STEP 9.5).
+## 워치독 — `check-digests.yml` (07:50 KST)
+4개 manifest 최신 date가 오늘(KST)인지 점검, 누락 시 Gmail 경보 + GH Actions 빨간 X. provider 무관(생성 방식과 독립). `check_digests.py`.
 
-## 로컬 클론 / 동기화 (다른 PC에서 작업 시작하기)
-- 이 저장소는 머신마다 다른 경로에 클론한다. 현재 주 작업 PC 기준 `/home/jaykwon/projects/33rd-agent/digest-site` (origin = `coll20/competitor-digest-site`). (구 경로 `27th-agent`은 폐기.)
-- **새 PC 셋업**: ① `gh auth login`(account `coll20`, scope `repo`+`workflow`) → git push가 gh credential helper로 자동 인증됨. ② `git clone https://github.com/coll20/competitor-digest-site.git`. ③ 루틴 관리는 Claude Code의 `RemoteTrigger`/`/schedule`(claude.ai 계정 인증, PC 무관)로 어디서든 가능 — 별도 키 불필요. ④ 비상 수동 운영용 원본 시크릿(카카오·Gmail·PAT 원본값)은 이 repo에 없고, 로컬 전용 마스터 노트(주 PC의 `33rd-agent/CLAUDE.md`, git 비추적)에만 있다 — 필요 시 안전한 채널로 별도 전달.
-- `.claude/`는 **`.gitignore`에 등록**돼 있다 — 로컬 `settings.local.json`에 PAT가 평문으로 있어 절대 커밋 금지.
-- 로컬에서 push: gh 인증이 있으면 `git push origin HEAD:main`. gh 없이 토큰으로 일회성 push → `git -c credential.helper= push "https://x-access-token:<PAT>@github.com/coll20/competitor-digest-site.git" HEAD:main`.
+## 파일 맵
+```
+scripts/
+  lib/digestlib.py                 # 4개 공유 헬퍼
+  competitor/{config.json,generate.py}
+  douzone/{config.json,generate.py}
+  fsc/{config.json,generate.py}
+  ai/{config.json,generate.py}
+.github/
+  workflows/{competitor,douzone,fsc,ai}.yml   # 생성(cron, OpenAI)
+  workflows/deploy.yml             # push→Netlify(+verify_links 게이트)
+  workflows/notify.yml             # 경쟁사 배포완료→카톡+Gmail
+  workflows/check-digests.yml      # 07:50 워치독
+  scripts/verify_links.py          # 인용링크 게이트
+  scripts/notify.py                # Kakao+Gmail+secret 갱신
+  scripts/check_digests.py         # 신선도 점검
+index.html · archive/<date>.html · archive/manifest.json · styles.css · sidebar.js   # 경쟁사(루트)
+ai/ · fsc/ · douzone/             # 각 디제스트(index·archive·manifest·styles·sidebar; ai는 <date>-ko.html도)
+```
 
-## AI 기술 동향 다이제스트 (/ai)
-글로벌 AI 기술 동향을 매일 정리하는 두 번째 다이제스트. 같은 repo·Netlify·deploy·notify 인프라 위에서 `/ai` 경로로 서빙된다.
-- **Live**: https://competitor-digest-jay-1779945070.netlify.app/ai/
-- **파일**: `ai/index.html`(최신), `ai/archive/<date>.html`(아카이브), `ai/archive/manifest.json`, `ai/styles.css`(틸/인디고 테마, 자체 완결형), `ai/sidebar.js`(`/ai/archive/manifest.json` fetch, `/ai/`로 링크).
-- **생성 루틴 ID**: `trig_01FJQEYTS9m2b9cB3a2qp14J` (이름: "Daily Global AI Tech Digest (테크핀 인사이트 포함)")
-  - **cron**: `0 21 * * *` (UTC) = **06:00 KST** — 경쟁사 루틴(07:00 KST)보다 1시간 먼저 실행해 07:30 알림 전 둘 다 준비됨. push는 `git pull --rebase` 후 수행(경쟁사 루틴과 충돌 방지).
-  - **model**: `claude-sonnet-4-6`, env `env_012Eb5mv4x1BeWNXF8NxBfz9` (경쟁사 루틴과 공유).
-- **콘텐츠 구조**: 🎯 오늘의 핵심 3(CEO 스타일) → **5개 고정 영역** 카드(🌐 frontier / 🔧 infra / 🧩 agents / 🏦 finance / 📜 policy) → 💡 **테크핀레이팅스 인사이트**(동향이 회사 자산에 주는 함의 4~5개 종합) → 📚 이번 주 누적(recap) → Sources.
-  - 핵심 차별점: **글로벌 동향 우선**(영문 1차 소스), 모든 항목에 **출처 매체+인라인 링크+💡 테크핀 연관 인사이트**, finance 영역 최우선.
-  - 테크핀 자산(월단위 세무·상거래 데이터, CPS 491, GNN 부도예측, EWS, D-Pay, AI 경영진단, 사기탐지, 은행 CSS 납품)에 동향을 연결하는 인사이트가 핵심 가치.
-- **dedup·링크검증**: 경쟁사 루틴과 동일하게 전날 AI 아카이브 대비 NEW/ALREADY_COVERED 분류 → recap, 그리고 배포 직전 STEP 9.5 전 URL 검증(HTTP 200 + 실제 기사 본문 + 키워드 일치, 검색·목록 페이지/깨진 링크 제거).
-- **한글 상세 + 🇰🇷 한글로 읽기 (2026-06-02)**: 각 카드/CEO에 `🇰🇷 한글로 읽기` 버튼 → `ai/archive/<date>-ko.html`(각 항목 6~10문장 **자체 작성 한글 상세본**, 원문 전문 번역 아님=저작권 안전 + 항목별 `원문 보기` 링크). 영문 1차=primary, 같은 사건의 **검증된** 국내 한글 보도가 있으면 `card-meta`에 `🇰🇷 국내 보도`(`.kr-src`) 보조 칩. 앵커 규칙 area+순번(frontier-1…). 스타일 `.ko-wrap`/`.ko-entry`/`.ko-btn`/`.kr-src`는 `ai/styles.css`. 루틴 프롬프트에 STEP 4(국내보조·blog금지)·6(ko_detail_ko·source_url_kr·anchor_id)·8.5(버튼/칩)·**8.6(한글 페이지 생성)**·9.5(국내URL·앵커 검증) 영구 반영. ⚠️ ko 페이지는 manifest 미포함(사이드바 비표시).
-- **크로스링크**: 경쟁사 페이지 사이드바에 `.sidebar-switch`로 `/ai`행, AI 페이지 사이드바에 `/`행 링크 상호 연결.
-- **알림 통합**: `notify.py`가 두 manifest(`/archive/manifest.json` + `/ai/archive/manifest.json`)를 모두 읽어 **1통**에 두 섹션(경쟁사 + AI)으로 카카오톡·Gmail 발송. AI manifest 없으면 경쟁사만 발송(graceful).
-- **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ create/update 스키마: `session_context`는 `job_config.ccr` **안에** 위치(model/allowed_tools 포함), `events[].data`에 `uuid/session_id/type/parent_tool_use_id` 필요.
-- ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사 루틴과 동일 토큰). 이 repo에 커밋 금지.
-
-## FSC 동향 다이제스트 (/fsc)
-대한민국 **금융위원회(FSC) 알림마당**을 매일 모니터링하는 세 번째 다이제스트. 같은 repo·Netlify·deploy·notify 인프라 위에서 `/fsc` 경로로 서빙된다. 금융위는 신용평가·기업데이터·핀테크 업계의 직접 규제기관이다.
-- **Live**: https://competitor-digest-jay-1779945070.netlify.app/fsc/
-- **파일**: `fsc/index.html`(최신), `fsc/archive/<date>.html`(아카이브), `fsc/archive/manifest.json`, `fsc/styles.css`(네이비/골드 자체 테마), `fsc/sidebar.js`(`/fsc/archive/manifest.json` fetch, `/fsc/`로 링크).
-- **모니터링 9개 게시판**: 📰 보도자료(`/no010101`) · 🗣️ 보도설명(`/no010102`) · 📢 새소식(`/no010105`) · 🏛️ 금융위 의결(`/no020101`) · ⚖️ 증선위 의결(`/no020102`) · 🚫 제재정보(`/no020103`, 상세는 주로 금감원 fss.or.kr) · 📈 금융시장동향(`/no030101`) · 📊 금융지표(`/no030102`) · 🎴 카드뉴스(`/no040101`).
-- **생성 루틴 ID**: `trig_01SryyhJftXg4VH1suEHgeF3` (이름: "Daily FSC (금융위) Digest")
-  - **cron**: `0 20 * * *` (UTC) = **05:00 KST** — AI(06:00)·경쟁사(07:00)보다 먼저 실행해 07:30 알림 전 셋 다 준비. push는 `git pull --rebase` 후 수행(다른 루틴과 충돌 방지).
-  - **model**: `claude-sonnet-4-6`, env `env_012Eb5mv4x1BeWNXF8NxBfz9`(공유).
-- **콘텐츠 구조**: 🎯 오늘의 핵심(TOP 3) → **9개 게시판 섹션** 카드(게시판칩 + 원문 제목 인라인 링크 + 2~3문장 자체 요약 + 💡 업계 함의) → 💡 **신용평가·핀테크 업계 함의 종합** → 📚 이번 주 누적(recap) → Sources.
-  - 차별점: **금융위 원문(fsc.go.kr) 직접 링크**, post ID 기반 dedup(뉴스보다 정확), 각 항목에 신용평가/기업데이터/핀테크 업계 함의. PDF·이미지 위주 게시판(의결서·금융지표·카드뉴스)은 제목·안건명만 보수적 요약 + 링크(추측·날조 금지).
-- **dedup·링크검증**: 전날 FSC 아카이브 대비 post URL/ID로 NEW/ALREADY_COVERED 분류 → recap, 배포 직전 STEP 9.5 전 URL 검증(HTTP 200 + 상세페이지 존재).
-- **알림 통합**: `notify.py`가 세 manifest(`/archive` + `/ai/archive` + `/fsc/archive`)를 모두 읽어 **1통**에 세 섹션(경쟁사 + AI + 금융위)으로 발송. FSC manifest 없으면 해당 섹션만 생략(graceful).
-- **크로스링크**: 경쟁사·AI 사이드바에 `/fsc` 행 추가, FSC 사이드바에 `/`·`/ai` 행. 루틴이 전날 아카이브를 템플릿으로 쓰므로 링크가 매일 보존·전파됨.
-- **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ 게시판 추가/제거 시 STEP 4 board 목록 + STEP 8 sidebar anchors 동시 수정.
-- ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사/AI 루틴과 동일 토큰). 이 repo에 커밋 금지.
-
-## 더존비즈온 동향 다이제스트 (/douzone)
-**더존비즈온 그룹**(본사 + 계열사)을 **핀테크·기업데이터·AI·신용** 관점으로 매일 모니터링하는 네 번째 다이제스트. 같은 repo·Netlify·deploy·notify 인프라 위에서 `/douzone` 경로로 서빙된다. 더존비즈온은 ERP·세무 데이터 최대 보유사이자 **합작 신용평가사 테크핀레이팅스(더존·신한·SGI서울보증)의 모회사** — 기업데이터·CB 영역의 직접 경쟁자이자 데이터 공급·협력 파트너라는 양면성을 가진다.
-- **Live**: https://competitor-digest-jay-1779945070.netlify.app/douzone/
-- **파일**: `douzone/index.html`(최신), `douzone/archive/<date>.html`(아카이브), `douzone/archive/manifest.json`, `douzone/styles.css`(크림슨/앰버 자체 테마), `douzone/sidebar.js`(`/douzone/archive/manifest.json` fetch, `/douzone/`로 링크).
-- **모니터링 6개 카테고리**: 🏢 실적·경영·전략(biz) · 💳 핀테크·금융(fintech) · 🗄️ 기업데이터·신용(data) · 🤖 AI·신사업(ai) · 🌐 플랫폼·ERP 위하고(platform) · 🤝 계열사·투자·M&A·파트너십(group). 회사 중심이라 경쟁사 다이제스트의 뉴스검색 방식 + AI/FSC의 주제별 섹션 구조를 결합.
-- **생성 루틴 ID**: `trig_01X4BRezpqH5ftebw4NJnPad` (이름: "Daily Douzone (더존비즈온) Digest")
-  - **cron**: `0 19 * * *` (UTC) = **04:00 KST** — FSC(05:00)·AI(06:00)·경쟁사(07:00)보다 먼저 실행해 07:06 알림 전 넷 다 준비. push는 `git pull --rebase` 후 수행(다른 루틴과 충돌 방지).
-  - **model**: `claude-sonnet-4-6`, env `env_012Eb5mv4x1BeWNXF8NxBfz9`(공유).
-- **콘텐츠 구조**: 🎯 오늘의 핵심(TOP 3) → 6개 카테고리 섹션 카드(매체칩 + 원문 인라인 링크 + 2~3문장 자체 요약 + 💡 테크핀 함의) → 💡 **테크핀레이팅스 함의 종합** → 📚 이번 주 누적(recap) → Sources.
-  - 차별점: 경쟁사 루틴과 동일한 **멀티채널 뉴스검색**(회사명+뉴스성 키워드 + 네이버 뉴스 인덱스, 브랜드명 단독검색 금지, blog/cafe 인용 금지) + 배포 직전 STEP 9.5 전 URL 검증 + 모든 항목에 테크핀레이팅스 관점 함의.
-  - ⚠️ **루틴 프롬프트에 박힌 날조방지 사실 3건**: ① 제4 인터넷은행('더존뱅크') 컨소시엄은 2025-03 예비인가 철회로 종료 → "인뱅 인가" 류 가짜 최신성 금지(fintech 섹션은 정직 empty-state 허용). ② 더존비즈온은 2026년 EQT파트너스 공개매수로 완전자회사화·자진 상장폐지(비상장 PE 전환). ③ 테크핀레이팅스=더존 계열사 본인 → '계열사 동향'으로 수록하되 함의는 자사 포지셔닝 관점.
-- **dedup·링크검증**: 전날 더존 아카이브 대비 NEW/ALREADY_COVERED 분류 → recap, 배포 직전 STEP 9.5 전 URL 검증(HTTP 200 + 실제 기사 본문 + 키워드 일치).
-- **최신성(recency-first) 정책 (2026-06-09 추가)**: STEP 4에서 후보를 보도일자로 `PRIMARY(≤7일)/BACKUP(8~30일)/DISCARD(30일 초과=폐기)` 3분류, STEP 6에서 카테고리 내 날짜 내림차순 + **30일 하드캡**(EQT 상폐 등 과거 대형 이벤트 카드 금지) + 전체 카드 최소 절반 7일 윈도우 내. ⚠️ 단 더존은 상장폐지 진행 중이라 6월 신규 보도가 객관적으로 매우 적음(2026-06-09 수동 16쿼리 검증 시 7일 윈도우 내 0건) — 정책이 맞아도 콘텐츠가 빈약할 수 있고, 그땐 정직한 empty-state/누적 강등이 맞다.
-- **알림 통합**: `notify.py`가 네 manifest(`/archive` + `/ai/archive` + `/fsc/archive` + `/douzone/archive`)를 모두 읽어 **1통**에 네 섹션으로 발송. 더존 manifest 없으면 해당 섹션만 생략(graceful).
-- **크로스링크**: 경쟁사·AI·FSC 사이드바에 `/douzone` 행 추가(index + 직전 archive 모두 — 루틴 템플릿 전파용), 더존 사이드바에 `/`·`/ai/`·`/fsc/` 행. 루틴이 전날 아카이브를 템플릿으로 쓰므로 매일 보존·전파됨.
-- **프롬프트 수정**: `/schedule` 스킬 또는 `RemoteTrigger get/update`로 이 루틴의 `job_config.ccr.events[].data.message.content` 편집. ⚠️ 카테고리 추가/제거 시 STEP 8 sidebar anchors + 섹션 순서 동시 수정.
-- ⚠️ 프롬프트에 push용 GitHub PAT 평문 포함(경쟁사/AI/FSC 루틴과 동일 토큰). 이 repo에 커밋 금지.
+## 트러블슈팅
+| 증상 | 진단 | 조치 |
+|---|---|---|
+| 특정 digest 안 갱신 | `gh run list --workflow=<name>.yml` 로그 확인(전 단계 로그 보임) | 수집 0건이면 config의 queries/feeds/match 점검; OpenAI 에러면 키/모델/쿼터; push 실패면 ADMIN_PAT |
+| 카톡/메일 안 옴 | notify.yml 실패 또는 경쟁사 배포가 "Daily digest:"로 안 됐는지 | notify 로그 → Kakao refresh_token·GMAIL_APP_PASSWORD 확인 |
+| 배포 실패 "citation link" | verify_links 게이트가 루트/목록/검색/blog 인용 발견 | 로그의 bad URL을 개별 기사 URL로 교체 또는 항목 제거(보통 config·프롬프트 튜닝) |
+| 07:50 경보 메일 | 워치독이 오늘치 누락 감지 | 해당 digest 워크플로 로그 확인 후 `gh workflow run <name>.yml`로 수동 보충 |
 
 ## 작업 로그
-- **2026-06-28**:
-  - **생성 누락 근본원인 발견 + 4대 조치** — 사용자가 "요 며칠 생성이 안 되고, 카카오 요약에 할루시네이션" 제보. 진단: 4개 루틴 cron은 정상 fire되나(전부 06-27 last_fired) GitHub HEAD는 06-26 사람 커밋에서 멈춤=루틴이 돌아도 push가 안 됨. **스모킹 건 = `git push origin main 2>&1 | tail -3`** — 파이프가 push 종료코드를 `tail`의 0(성공)으로 덮어써, push 거부(non-fast-forward)돼도 에이전트가 "✅ Pushed"로 거짓 보고하고 4개 모두 실패를 소리없이 삼킴(나머지 3개의 `|| rebase` fallback도 `| tail` 때문에 영원히 미실행). PAT는 유효(GitHub API 200), 토큰 문제 아님. "할루시네이션"은 notify.py가 manifest headline을 날짜검증 없이 발송 → 생성 실패 시 어제 내용을 오늘 것처럼 재발송(staleness)이 주원인.
-    - **조치 ① notify.py 신선도 가드**: 오늘(KST) ≠ 섹션 최신날짜면 카카오·Gmail에 `⚠️ 오늘(MM-DD) 미갱신 · 최신 X` 플래그 후 발송(상단 요약 라인 + Gmail 빨간 배너). 제목 날짜도 today 기준. (사용자 선택: 플래그 후 발송)
-    - **조치 ② 4개 루틴 push 하드닝**: STEP 10을 `set -o pipefail` + push 재시도 루프(5회, 실패 시 fetch+rebase 후 재시도, 끝내 실패면 `❌ PUSH_FAILED`로 명확 보고·✅ 금지)로 교체. `| tail` 제거(종료코드 보존). NO_CHANGES도 실패로 간주. 클론 `--depth=1`→`--depth=80`(rebase 안전). RemoteTrigger update 4건 200, PAT 무결성 확인.
-    - **조치 ③ HEADLINE 그라운딩(할루시네이션 금지)**: 4개 프롬프트에 'manifest headline은 실제 게재·검증 통과한 카드 사실만으로 구성, 카드에 없는 수치·고유명사 신설 금지, 신규 0건이면 정직히 표기' 규칙 추가.
-    - **조치 ④ 백스톱 캐치업 루틴 신설**: `trig_01WSBKxd6rgFkmcjtd2a71xH` (이름 "Daily Digest Backstop (08:00 KST 누락 보충)"), cron `0 23 * * *`=**08:00 KST**(1차 4개 루틴 04~07시 뒤). 4개 manifest 점검해 오늘치 누락 digest만 전날 archive 템플릿으로 보충 생성·하드닝 push. 경쟁사 보충 시 그 push가 deploy→notify 자동 트리거. 정상인 날은 무동작. model `claude-sonnet-4-6`, env 공유, PAT 임베드(다른 루틴과 동일).
-  - **방어선 요약**: 1차 루틴(04~07 KST, 하드닝 push) → ~07:06 notify(신선도 플래그) → 08:00 백스톱(누락 보충+필요시 notify 재발화) → 09:00 check-digests 워치독(이메일 경보).
-  - **검증/주의**: ⚠️ **수동 `RemoteTrigger run`은 이 환경에서 push가 안 됨(재확인, 06-09와 동일)** — 백스톱·경쟁사 수동 run 모두 무반응. 검증은 cron 정기실행으로만 가능. 대신 **끊겼던 push 고리 자체는 실증 완료**: 루틴의 임베디드 PAT + 하드닝 STEP10 시퀀스로 빈 커밋을 main에 실제 push 성공(1차 시도, `Daily Digest Routine` 작성자). → 생성은 원래 정상이므로 다음 cron부터 정상화 확신. **6/27·6/28 콘텐츠는 빈 채로 남음**(수동 run 불가로 당일 보충 못 함). main에 무해한 빈 테스트 커밋 `test: 하드닝 push 고리 확정…`(789caad) 1개 존재(콘텐츠 0 변경, 필요시 force-push로 제거 가능).
-- **2026-06-16**:
-  - **인용링크 무결성 사고 + 2중 방어 도입** — 사용자가 FSC 6/16 다이제스트의 "신정법 동의제도 개편 법률자문단 킥오프"(권대영 부위원장) 항목 링크를 눌렀더니 해당 보도자료가 없다고 제보. 진단: **사건 자체는 실제**(머니투데이·뉴스핌·이데일리 6/16 보도)였으나, FSC 루틴이 fsc.go.kr 개별 게시물을 특정 못 하자 **게시판 루트(/no010101, postId 없음)를 source_url로 박았고**, STEP 9.5가 'HTTP 200+키워드 포함'만 봐서(루트도 200·헤드라인 나열로 키워드 포함) 통과시킴. FSC 프롬프트에 board-root 강등 탈출구가 명시돼 있던 게 직접 원인. 경쟁사·AI·더존은 이미 개별기사 URL만 써서 무사(검증으로 확인).
-  - **조치 ① 프롬프트(4개 전부)**: `CITATION URL DOCTRINE`(인용은 개별 기사/게시물만; 목록·루트·검색·홈·blog 금지; 못 구하면 제거/대체, 루트로 때우기 금지; 네비게이션 링크는 예외) 추가 + STEP 9.5를 '내용 일치 검증'(그 페이지가 이 사건을 실제로 다루는가) + `verify_links.py` PASS 필수로 강화. FSC는 board-root 탈출구 삭제 + 개별 게시물 없으면 검증된 언론사 기사로 대체 허용. RemoteTrigger update 4건 200, 임베디드 PAT 보존 확인.
-  - **조치 ② 결정론적 게이트**: `.github/scripts/verify_links.py` 신설(stdlib만, 변경 HTML의 인용링크가 루트/목록/검색/blog면 exit 1). `deploy.yml`에 배포 직전 단계로 연결(변경된 *.html만 검사, fetch-depth:0). FAIL이면 배포 실패→notify도 차단(notify는 배포 성공 종속). LLM이 지시를 건너뛰어도 막히는 하드 가드.
-- **2026-06-09**:
-  - **더존 루틴 STEP 4·6 최신성(recency-first) 개편** — 사용자 피드백("기사가 너무 과거 것만 스크랩")으로 시작. 원인: 창간호~초기 자동생성분이 EQT 상폐(2~3월)·퓨리오사AI(2/19)·EY한영(3/31) 등 과거 milestone만 수집(WebSearch가 유명 과거 기사를 상단에 줌). **수정**: STEP 4에 RECENCY-FIRST 블록 신설 — 후보를 보도일자로 `PRIMARY(≤7일)/BACKUP(8~30일)/DISCARD(30일 초과=폐기)` 3분류, 네이버 최신순 상단부터 확보. STEP 6에 카테고리 내 **날짜 내림차순** + **30일 하드캡**(EQT 등 과거 대형 이벤트 카드 금지) + **전체 카드 최소 절반 7일 윈도우 내** 추가. STEP 7/11/QUALITY BAR도 일치. `RemoteTrigger update` 200 확인(임베디드 PAT 보존). 다음 04:00 KST 자동 실행부터 적용.
-  - **오늘(6/09) 더존 페이지 수동 갱신** — 수동 `RemoteTrigger run`이 push 안 함(27분 폴링 무반응 → "no changes"/실패 추정) → 직접 WebSearch+서브에이전트(16쿼리)로 발굴·검증 후 페이지 재작성. 가장 오래된 2~3월 카드(EY한영·퓨리오사) 제거→recap 강등, **위하고 AI 에디션(5/21) 전면화** + EQT 6월 일정(6/25 매매정지·6/30 주식교환) + 레플릿 MOU(5/07). URL 12개 전수 HTTP 200 검증 후 push·배포 확인. ⚠️ **6/2~6/9 윈도우 내 신규 보도 객관적 0건**(더존 상장폐지 진행 중 IR 침묵) — 최신이 5/21까지인 건 콘텐츠 자체 한계.
-  - **운영 gotcha 발견** — `search.naver.com`(네이버 뉴스 검색 결과 페이지)은 **로컬 Claude Code 환경에서 WebFetch 차단**("unable to fetch")(루틴=Anthropic 클라우드 환경에선 됨). 로컬 수동 발굴 시엔 WebSearch(개별 기사 URL)+한국 언론사 직접 노림+개별 URL만 WebFetch 검증으로 우회. WebSearch는 US-only라 한국 최신 뉴스 약함.
-- **2026-06-08**:
-  - **더존비즈온 그룹 동향 다이제스트(`/douzone`) 추가** — 4번째 다이제스트. 더존비즈온 본사+계열사를 핀테크·기업데이터·AI·신용 관점으로 모니터링. 6개 주제 카테고리(실적·경영 / 핀테크·금융 / 기업데이터·신용 / AI·신사업 / 플랫폼·ERP / 계열사·투자) + 오늘의 핵심 TOP3 + 테크핀레이팅스 함의 종합. 크림슨/앰버 자체 테마. 창간호 시드 8개 카드(EQT 공개매수·상장폐지, 위하고 AI 에디션, 테크핀레이팅스 월 재무제표, ONE AI 에이전틱, 레플릿 메이커톤, 종소세 교육, EQT 2차 공개매수, 롯데이노베이트 OmniEsol) — 전 항목 etnews/ZDNet 원문 WebFetch 검증. 생성 루틴 `trig_01X4BRezpqH5ftebw4NJnPad`(04:00 KST). `notify.py`를 네 다이제스트 통합 1통 발송으로 확장. 4-way 사이드바 크로스링크.
-  - **리서치 정정사항(루틴 프롬프트에 영구 반영)**: 제4 인터넷은행(더존뱅크) 컨소시엄은 2025-03 철회로 종료(인뱅 인가 류 가짜 최신성 금지) / 더존비즈온은 2026년 EQT 공개매수로 비상장 PE 전환 / 테크핀레이팅스는 더존 핀테크 계열사 본인.
-- **2026-06-05**:
-  - **금융위원회(FSC) 동향 다이제스트(`/fsc`) 추가** — 3번째 다이제스트. 금융위 알림마당 9개 게시판(보도자료·보도설명·새소식·금융위/증선위 의결·제재정보·금융시장동향·금융지표·카드뉴스)을 매일 모니터링. 네이비/골드 자체 테마, 게시판별 섹션 + 오늘의 핵심 TOP3 + 업계 함의 종합. 창간호 시드(보도자료 6·보도설명 3·새소식 1·금융위 의결 1·금융시장동향 1 카드, 전 항목 fsc.go.kr 원문 검증). 생성 루틴 `trig_01SryyhJftXg4VH1suEHgeF3`(05:00 KST). `notify.py`를 세 다이제스트 통합 1통 발송으로 확장(경쟁사+AI+금융위). 3-way 사이드바 크로스링크.
-- **2026-06-02**:
-  - **글로벌 AI 기술 동향 다이제스트(`/ai`) 추가** — 5개 영역 카드 + 테크핀 인사이트 섹션, 자체 테마 CSS/sidebar, 창간호 시드(12개 항목 전수 링크검증), 생성 루틴 `trig_01FJQEYTS9m2b9cB3a2qp14J`(06:00 KST), `notify.py`를 두 다이제스트 통합 1통 발송으로 확장, 양 사이트 크로스링크.
-  - **AI 한글 상세 기능** — `🇰🇷 한글로 읽기` 버튼 + `ai/archive/<date>-ko.html`(자체 작성 한글 상세본) + 글로벌 1차/국내 보조 링크(`🇰🇷 국내 보도`). AI 루틴에 영구 반영(STEP 4·6·8.5·8.6·9.5). 시드 국내 보도칩 2건(앤트로픽 금융에이전트=ZDNet, EU AI법=디지털투데이).
-  - **경쟁사 루틴 STEP 4 검색 개편(rev2)** — 사용자 피드백(기관명 중심으로 더 많이)으로 시작. 1차 시도(rev1 "이름만 검색")가 **브랜드명 단독 WebSearch=회사 홈페이지·주식·채용 페이지만 반환**임을 수동 테스트로 발견(루틴이 또 전 회사 "신규 없음") → **rev2**로 정정: "회사명+뉴스성 키워드 + 네이버/구글뉴스(뉴스 인덱스)" 발견 + **2차 언급 기사**(타기관 헤드라인 속 경쟁사: 예 케이뱅크+NICE 공동출시) 포착 + blog/cafe 인용 금지 + 가벼운 관련성 필터. 계기: NICE 산학연구포럼 기사(ddaily/newsfreezone, 5/29)가 rev1에서 누락된 케이스.
-  - **운영 gotcha 발견** — ① 수동 `RemoteTrigger run`은 상태/로그 조회 불가(`get`의 `last_fired_at`은 cron 정기실행만 갱신; 수동 run은 push해도 안 바뀜) → 결과 확인은 GitHub 원격 HEAD 폴링(새 "Daily digest" 커밋). "no changes"면 push 없음. ② `blog.naver.com`/`cafe.naver.com`은 WebFetch 불가 → 검증 불가 → 인용 금지.
-- **2026-05-28**: 사이트 v1 부트스트랩, Netlify 배포 워크플로, 매일 알림(카카오+Gmail) 추가.
-- **2026-05-29**: 본문 항목에 원문 기사 **인라인 링크** 추가(CEO·recap). 영구 규칙은 생성 루틴 프롬프트의 새 `STEP 8.5 · INLINE SOURCE LINKS`에 반영. 테스트 아카이브 `2026-05-29 (밤 버전)` 추가. `sidebar.js` 날짜 표시 정규화 및 `label` 변형 링크 처리.
-- **2026-05-30**:
-  - **검색 채널 대폭 확장** — 생성 루틴 STEP 4를 멀티채널(회사당 4~6개 쿼리 + **네이버 포털 뉴스 검색 필수** + Google News/공식 뉴스룸/DART 보조)로 재작성. 회사당 후보 ≥5개 목표.
-  - **빈 날 방지 fallback 신설** — STEP 6에 7일 내 신규 0건 시 8~14일 백업 풀에서 항목을 끌어오는 정책 추가. recap 상한 10→15.
-  - **테스트 실행 검증** — 새 프롬프트로 1회 수동 실행(`RemoteTrigger run`). 결과: 전 회사 빈칸이던 5/30이 KCB(카카오페이 스코어 주금공 도입)·이크레더블(한기평 IFRS18 리포트) 카드로 채워지고 Sources 12개, 가짜/검색페이지 링크 0개 확인. → 정식 5/30 다이제스트로 채택.
-  - **GitHub PAT 로테이션** — 노출 우려로 토큰 교체(신규 만료 2027-05-29). 교체 위치 2곳: ① 원격 루틴 프롬프트, ② 로컬 `.claude/settings.local.json`. 새 토큰 권한 = **Contents R/W 만**(Secrets 권한 불필요 — Secret 갱신은 별도 `ADMIN_PAT` 담당). **기존(노출) 토큰은 아직 revoke 안 함 — 사용자가 추후 폐기 예정.**
-  - 로컬 저장소 클론 + `.claude/` gitignore 등록.
-  - **출처 매체 전 항목 표기** — 카드 `source-chip`, CEO `src-tag`, recap·Sources 매체명. `styles.css`에 `.card-meta`/`.source-chip`/`.src-tag` 스타일 추가.
-  - **링크 무결성 버그픽스** — 테스트 실행분에서 이크레더블 "한국기업평가 IFRS18 이슈리포트" 카드가 실제 기사가 아니라 `korearatings.com/cms` **목록 페이지**를 링크하고 있었음(사용자 발견). 해당 항목 제거. 추가로 가짜 NICE 기사(fntimes 빈 페이지)·무관 기사(etnews CJ ENM)·깨진 링크(venturesquare 410·wowtale 403)도 제거.
-  - **배포 직전 URL 전수 검증 도입** — 본문·Sources의 모든 URL을 HTTP 200 + 실제 기사 본문 + 제목 키워드 일치로 검증한 뒤에만 배포. 5/30분 9개 URL 전수 통과 확인 후 배포.
-  - **루틴 프롬프트에 영구 반영 완료** — STEP 4(B)에 네이버 검색페이지 URL 금지 규칙, STEP 6/7에 `source_name` 필드, STEP 8.5에 출처 매체 표기(src-tag/source-chip) 규칙, STEP 9.5(배포 직전 링크 전수 검증) 신설, STEP 11 Link check 리포트, QUALITY BAR 갱신. RemoteTrigger update 200 + 응답 본문으로 반영 확인(updated_at 2026-05-30 13:09 UTC). 다음 07:00 KST 자동 실행부터 적용.
+- **2026-06-29**: **전체 시스템 리팩토링 — Anthropic 루틴 → GitHub Actions + OpenAI**
+  - 계기: 옛 Anthropic 루틴들이 06-27~29 전부 생성 실패(루틴은 fire되나 push 0건). 근본 원인은 push 단계가 아니라 생성 단계(불투명 루틴의 조용한 실패). 사용자가 전면 리팩토링 결정.
+  - 새 구조: 4개 digest 각각 GitHub Actions cron + Python 스크립트. 수집(Naver/fsc.go.kr/RSS)은 결정론적, OpenAI는 글쓰기만, 렌더도 코드. 공유 `digestlib.py`. verify_links 게이트·화이트리스트 가드·NO_CHANGES 실패·하드닝 push 유지. 4개 전부 로컬 + GH dispatch로 실환경 검증(competitor production·douzone·fsc·ai 모두 success).
+  - 06-29 비상 백필(옛 시스템 06-27~29 누락분)도 수행. 옛 루틴 5개 비활성화. 워치독 09:00→07:50 KST. FSC 제재정보 보드 FSS URL 교정.
+  - 모델 `gpt-5.1`(Secret `OPENAI_MODEL`), 뉴스피드 키 = `NAVER_CLIENT_ID/SECRET`.
+  - 후속 여지: 같은 사건 다매체 중복 카드(제목 유사도 dedup v2), AI finance 피드 보강.
+- (이전 이력은 git 히스토리 및 로컬 마스터 노트 참조 — 옛 Anthropic 루틴/프롬프트 기반이라 현재 구조와 무관.)
