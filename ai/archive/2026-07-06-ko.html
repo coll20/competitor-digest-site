@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-07-06 AI 다이제스트 — 한글 상세</title>
+<meta name="description" content="2026-07-06 글로벌 AI 기술 동향 한글 상세 — 엔터프라이즈가 여는 ‘AI 충성도 시대’와 문서·에이전트 인프라 대전환">
+<link rel="stylesheet" href="/ai/styles.css">
+</head>
+<body>
+<div class="ko-wrap">
+
+  <header class="hero">
+    <span class="eyebrow ko-eyebrow">🇰🇷 한글 상세 · 2026-07-06</span>
+    <h1>글로벌 AI 기술 동향 — 한글 상세 해설</h1>
+    <p class="meta">기간: <strong>2026-06-30 ~ 2026-07-06</strong> · 카드 한국어 해설 · 테크핀레이팅스 인사이트 포함</p>
+    <nav class="ko-backlinks">
+      <a class="ko-btn" href="/ai/archive/2026-07-06.html">← 카드 요약본으로</a>
+      <a class="ko-btn ghost" href="/ai/">최신 AI 다이제스트</a>
+    </nav>
+  </header>
+
+  <div class="notice">
+    본문 한글은 전문 번역이 아니라 <strong>테크핀레이팅스 자체 작성 요약·해설</strong>이며 정확한 원문은 각 항목 '원문 보기' 링크를 참고하시기 바랍니다.
+  </div>
+
+    <section class="company">
+      <div class="company-head"><span class="company-num">🔧</span><h2 class="company-name">인프라 · 반도체 · 컴퓨트</h2></div>
+      <article class="ko-entry" id="infra-1">
+        <div class="ko-entry-head"><span class="source-chip">The Decoder</span><span class="date-chip near">2026-07-06</span><a class="ko-orig" href="https://the-decoder.com/baidus-unlimited-ocr-processes-dozens-of-document-pages-in-one-pass-by-treating-memory-like-human-forgetting/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">바이두 ‘Unlimited OCR’, 인간의 ‘망각’ 모사해 수십 페이지 문서를 한 번에 읽는다</h3>
+        <div class="ko-body"><p>바이두의 Unlimited OCR는 단순히 인식률을 올리는 수준을 넘어, 아키텍처 차원에서 ‘긴 문서’를 어떻게 다룰지에 초점을 맞춘 점이 특징이다.</p><p>기존 OCR·비전 트랜스포머는 페이지가 늘수록 토큰·메모리 사용량이 폭증해, 10페이지 안팎에서 사실상 한계를 맞았다.</p><p>바이두는 주의 메커니즘을 수정해, 과거 페이지의 세부 정보는 요약·압축해 유지하고, 현재 처리 중인 페이지에 더 많은 자원을 쓰는 구조를 제안한다.</p><p>이는 인간이 오래된 정보를 대략적인 개요만 남기고 세부를 잊어가는 ‘망각’ 패턴과 유사하다는 설명이다.</p><p>이 덕분에 페이지 수와 무관하게 메모리 사용을 거의 평탄하게 유지하면서도, 중요한 정보는 놓치지 않아 주요 OCR 벤치마크에서 상위권 성능을 기록했다.</p><p>금융·보험·공공기관에서는 대출 서류, 보험 증권, 청구서, 세금계산서, 월세 계약 등 다페이지 문서가 여전히 핵심 데이터 소스다.</p><p>이런 문서를 한 번에 읽고 필드화할 수 있다면, 수작업 입력과 검증에 들어가는 비용·착오를 크게 줄일 수 있다.</p><p>TechFin 자산 관점에서는 이 OCR를 전처리 레이어로 활용해, 상거래 영수증·임대차 계약·공과금 고지서 등 CPS 관련 문서를 구조화한 뒤, GNN 부도예측·EWS·크레디뷰 모델에 바로 투입하는 자동 파이프라인 설계가 가능해진다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 여러 장의 청구서·계약서·상거래 영수증·월세 계약서를 한 번에 읽고 구조화할 수 있게 되면, CPS·거래데이터·문서데이터를 통합한 크레디뷰·부도예측·EWS 파이프라인 구축 비용이 크게 내려간다.</div>
+      </article>
+      <article class="ko-entry" id="infra-2">
+        <div class="ko-entry-head"><span class="source-chip">Ars Technica</span><span class="date-chip near">2026-06-30</span><a class="ko-orig" href="https://arstechnica.com/ai/2026/06/googles-new-nano-banana-2-lite-image-model-is-its-fastest-and-cheapest-yet/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">구글, ‘Nano Banana 2 Lite’ 이미지 모델 공개…속도·비용 최적화에 초점</h3>
+        <div class="ko-body"><p>Ars Technica는 Nano Banana 2 Lite가 구글 이미지 모델 라인업에서 ‘가장 빠르고 가장 저렴한’ 버전이라고 평가한다.</p><p>이 모델은 최고 화질보다는 반응 속도와 인퍼런스 비용을 우선시해 설계되었고, 몇 초 이내에 이미지를 생성할 수 있어 모바일 앱, 게임, 실시간 편집 툴 등에 적합하다.</p><p>구글은 이를 통해 ‘모든 곳에 깔린 이미지 엔진’ 역할을 기대하는 것으로 보이며, 고품질을 요구하는 크리에이티브 작업은 상위 모델에 맡기는 투트랙 전략이다.</p><p>이 움직임은 AI 인프라 전략이 단일 거대 모델 중심이 아니라, 용도별 경량 모델과의 조합으로 가고 있음을 보여준다.</p><p>금융·커머스에서는 이런 경량 모델로 결제 내역, 월세 납부 이력, 상거래 패턴을 시각적으로 요약한 리포트를 실시간 렌더링할 수 있다.</p><p>예를 들어 크레디뷰 형태의 신용진단 결과를 고객별 ‘건강 진단서’ 같은 이미지로 제공하거나, EWS 경보를 직관적 시각 대시보드로 보여주는 데 활용 가능하다.</p><p>저비용이므로 대규모 고객군에도 부담 없이 배포할 수 있고, CPS 자산·GNN 부도예측 결과를 이해하기 쉬운 시각화로 풀어내는 UX 자산으로도 의미가 크다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 저비용·저지연 이미지 모델은 카드명세·상거래·월세 데이터에 기반한 맞춤형 시각 리포트, 위험 알림, CPS 자산 대시보드를 대규모 고객에게 실시간 제공하는 데 중요한 인프라가 된다.</div>
+      </article>
+    </section>
+    <section class="company">
+      <div class="company-head"><span class="company-num">🧩</span><h2 class="company-name">에이전트 · 오픈소스 · 개발</h2></div>
+      <article class="ko-entry" id="agents-1">
+        <div class="ko-entry-head"><span class="source-chip">The Decoder</span><span class="date-chip near">2026-07-05</span><a class="ko-orig" href="https://the-decoder.com/ai-search-agents-dont-fail-at-searching-they-fail-at-asking-the-right-questions-when-queries-get-ambiguous/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">AI 검색 에이전트, ‘검색’이 아니라 ‘질문을 못 해서’ 실패한다</h3>
+        <div class="ko-body"><p>연구진은 AI 검색 에이전트가 왜 실제 복잡한 리서치 작업에서 자주 실망스러운 결과를 내는지 정량적으로 분석하기 위해 DiscoBench라는 벤치마크를 만들었다.</p><p>이 벤치마크는 의도적으로 애매하거나 다의적인 질의를 던져, 에이전트가 추가 질문을 할지, 검색을 반복할지, 그냥 추측할지를 관찰한다.</p><p>결과는 의외였는데, 많은 에이전트가 사용자에게 되묻기보다는 검색을 여러 번 반복하거나 임의로 가정을 하고 답을 내놓았고, 그 정확도는 단순 ‘한 번에 찍기’보다도 낮았다.</p><p>반면 질문을 명확히 정제하거나 쿼리의 애매함을 제거하면, 동일 모델의 성능이 최대 40포인트까지 점프했다.</p><p>이는 검색·툴 사용 능력보다</p><p>상호작용 설계가 병목이라는 뜻이다.</p><p>금융·리스크 영역에서도 비슷한 패턴이 있다.</p><p>CPS·거래·월세 데이터를 아무리 많이 넣어도, ‘정보가 애매한 케이스에서 언제 사람에게 승인을 넘길지’를 설계하지 않으면 EWS나 GNN 부도예측의 실무 가치는 떨어진다.</p><p>따라서 에이전트 시스템 구축 시에는 모델 선정보다 ‘질문 전략’, 승인 워크플로, 하이브리드 의사결정 프로토콜을 먼저 정의하는 접근이 필요하다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 월세무·상거래데이터·CPS 신호를 기반으로 한 AI 신용진단·부도예측 시스템도, 데이터만 늘리기보다 모호한 상황에서 심사자에게 되묻는 ‘질문 프로토콜’을 설계하는 것이 실무 성능을 좌우한다.</div>
+      </article>
+      <article class="ko-entry" id="agents-2">
+        <div class="ko-entry-head"><span class="source-chip">TechCrunch</span><span class="date-chip near">2026-07-03</span><a class="ko-orig" href="https://techcrunch.com/2026/07/02/mark-zuckerberg-tells-staff-that-ai-agents-havent-progressed-as-quickly-as-hed-hoped/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">저커버그 “AI 에이전트, 기대만큼 빨리 안 나간다” 내부 발언</h3>
+        <div class="ko-body"><p>TechCrunch 보도에 따르면, 저커버그는 최근 사내 회의에서 Meta의 AI 에이전트 개발 속도에 대해 솔직하게 불만을 표했다.</p><p>그는 에이전트가 사용자의 일상 업무·커뮤니케이션·쇼핑을 대신 수행하는 장기 비전을 갖고 있으나, 실제로는 신뢰도·안전성·UX 측면에서 해결해야 할 문제들이 예상보다</p><p>많다고 말했다.</p><p>특히 소셜 플랫폼 특성상 잘못된 자동행동이 이용자 경험과 규제 리스크로 직결되기에, 내부 테스트와 가드레일 설계에 상당한 시간을 쓰고 있는 것으로 전해진다.</p><p>이는 빅테크조차 에이전트 상용화에 ‘전능한 비서’가 아닌 제한된 업무 범위의 코파일럿부터 적용하는 이유를 설명한다.</p><p>금융·핀테크 기업에게도 비슷한 교훈이 있다.</p><p>신용심사, 상거래 대출, 월세부채 관리, 거래 모니터링 등 고위험 영역에서 에이전트에 완전 자율을 부여하는 것은 아직 시기상조일 수 있다.</p><p>대신 GNN 기반 부도예측, EWS, 크레디뷰 진단 결과를 에이전트가 정리·설명하고, 심사자가 최종 판단을 내리는 ‘결합 구조’를 설계하는 것이 현실적인 단계다.</p><p>Meta의 속도 조절은 규제기관에도 레퍼런스를 제공해, 에이전트에 대한 감독원칙 수립 시 ‘완전 자율’을 전제로 삼지 않도록 유도할 수 있다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 금융·결제에서 AI 에이전트에 의사결정을 온전히 맡기기보다는, 초기에는 크레디뷰·EWS·GNN 부도예측을 보조하는 ‘코파일럿’ 구조로 설계하고 인간 심사와 병행 검증하는 전략이 필요하다.</div>
+      </article>
+      <article class="ko-entry" id="agents-3">
+        <div class="ko-entry-head"><span class="source-chip">The Decoder</span><span class="date-chip near">2026-07-04</span><a class="ko-orig" href="https://the-decoder.com/anthropic-developer-shares-prompting-tips-for-fable-5-that-focus-on-finding-your-own-blind-spots-first/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">앤트로픽 개발자 “Fable 5를 잘 쓰려면, 먼저 사용자의 블라인드 스폿을 드러내라”</h3>
+        <div class="ko-body"><p>Shihipar는 블로그 형식의 글에서, Fable 5 같은 최신 모델을 사용할 때 많은 개발자가 여전히 ‘더 나은 프롬프트 텍스트’를 찾는 데 집착한다고 지적한다.</p><p>그의 주장에 따르면, 이제 병목은 모델이 아니라 사용자의 머릿속에 있는 암묵적 가정·누락된 요구사항·경계조건이다.</p><p>그는 ‘블라인드스폿 패스’라는 기법을 제안하는데, 이는 모델에게 “내 설계/계획에서 빠졌을 법한 부분을 인터뷰 형식으로 캐물어 달라”고 요청하는 것이다.</p><p>이렇게 하면 사용자가 인지하지 못했던 데이터 품질 이슈, 레이스 컨디션, 규제 제한 등이 표면으로 떠오른다.</p><p>그런 뒤에야 비로소 구현을 모델에게 맡기는 것이 효율적이라는 설명이다.</p><p>금융·리스크 도메인에서는 이 접근이 특히 중요하다.</p><p>예를 들어 월세무 기반 EWS나 상거래·CPS 데이터를 활용한 GNN 부도예측 모델을 설계할 때, ‘어떤 변수를 절대 사용하면 안 되는지’, ‘어떤 경우 인간 심사로 반드시 승계해야 하는지’ 같은 규제·윤리 경계가 선명해야 한다.</p><p>이 작업을 AI에게 되묻고 정리하게 하면, 크레디뷰식 정책·룰을 구조화하는 데 큰 도움을 줄 수 있다.</p><p>결국 TechFin에게 진짜 자산은 모델이 아니라, 이렇게 추출·정리된 문제 정의·제약조건 라이브러리라는 점을 시사한다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 월세무·상거래·CPS 데이터를 다루는 신용·리스크 모델 개발에서도, GNN·EWS·크레디뷰를 AI에게 구현시키기 전에 ‘규제·운영상 제약을 샅샅이 명문화하는 과정’이 가장 중요한 자산이 된다.</div>
+      </article>
+    </section>
+    <section class="company">
+      <div class="company-head"><span class="company-num">🏦</span><h2 class="company-name">금융 · 신용 · 핀테크 AI</h2></div>
+      <article class="ko-entry" id="finance-1">
+        <div class="ko-entry-head"><span class="source-chip">PYMNTS</span><span class="date-chip near">2026-07-03</span><a class="ko-orig" href="https://www.pymnts.com/news/artificial-intelligence/2026/the-enterprise-gives-ai-models-path-to-consumer-loyalty/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">엔터프라이즈가 생성형 AI 모델에 ‘소비자 충성도’ 경로를 깔아주고 있다</h3>
+        <div class="ko-body"><p>이 글은 생성형 AI 모델이 어떻게 소비자 충성도를 형성하는지, 과거 모바일·웹 앱과는 전혀 다른 경로가 열리고 있음을 짚는다.</p><p>기존에는 광고, 앱스토어, 입소문이 소비자 기술의 주된 유통 채널이었고, 이용자는 ‘앱 브랜드’에 충성했다.</p><p>그러나 생성형 AI 시대에는 은행 앱, 커머스 앱, 공과금·모빌리티 서비스의 백엔드에 탑재된 특정 AI 모델과의 상호작용이 누적되면서, 이용자가 인지하지 못하는 사이에 모델 단위의 신뢰·기대가 형성된다.</p><p>기업 입장에서는 어느 AI 스택을 선택하느냐가 단순 성능·비용 문제가 아니라 장기적인 고객 경험과 이탈률, 심지어 브랜드 인식까지 좌우하는 요소가 된다.</p><p>특히 결제, 신용, 보험, 챗봇 상담에서 AI가 ‘첫 접점’으로 전면에 나서면, 모델의 답변 스타일과 오류 패턴이 곧 금융기관에 대한 신뢰도로 전이된다.</p><p>보고서는 이 때문에 CIO뿐 아니라 CMO·CRO가 AI 스택 선정에 깊이 관여해야 한다고 제안한다.</p><p>TechFin 관점에서는 카드결제 데이터, 상거래 데이터, 월세 등 CPS 데이터 위에 어떤 모델을 얹느냐에 따라 CPS 위험 조기경보(EWS)와 GNN 기반 부도예측의 설계 자유도도 크게 달라진다.</p><p>국내 사업자 역시 단순 ‘벤더 선택’이 아니라, 향후 자체 모델과 멀티벤더 전략까지 포함한 AI 충성도 구조 설계를 서둘러야 한다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 국내 금융·커머스 사업자는 콜센터, 상거래 여정, 월세·생활데이터 분석에 어떤 AI 모델을 내장할지 선택하는 순간, 사실상 향후 5~10년간의 고객 데이터·충성도 분배 구조를 결정하게 된다.</div>
+      </article>
+      <article class="ko-entry" id="finance-2">
+        <div class="ko-entry-head"><span class="source-chip">PYMNTS</span><span class="date-chip near">2026-07-03</span><a class="ko-orig" href="https://www.pymnts.com/news/artificial-intelligence/2026/sap-hiring-less-as-it-focuses-on-core-ai-jobs/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">SAP, 전사 채용 줄이고 ‘핵심 AI 인력’에만 자원 집중</h3>
+        <div class="ko-body"><p>SAP는 전 세계 대기업의 재무·인사·조달 시스템을 지배하는 플레이어로, 그 채용·투자 방향은 곧 엔터프라이즈 IT의 로드맵을 반영한다.</p><p>이번 보도에 따르면 SAP는 신규 채용을 ‘코어 AI 역할’에만 제한하고, 다른 직무는 상당 부분 동결하거나 축소하겠다는 방침을 내부에 공유했다.</p><p>동시에 출장 등 비핵심 비용을 줄여 AI 관련 연구·제품 개발 예산을 늘리려 한다.</p><p>이는 단순 절감이 아니라, 기존 온프레미스·전통 ERP 중심 비즈니스에서 AI 기반 예측·자동화·에이전트 기능을 앞세운 SaaS 구조로 전환하려는 의지로 읽힌다.</p><p>금융권 입장에서는 SAP의 AI 전략이 리스크·자본관리, 재무·결제 회계 자동화 등 필수 인프라의 기능 로드맵에 직결된다.</p><p>만약 AI 고도화가 빠르게 진행되면, 은행·보험사는 코어 시스템 레벨에서 GNN 기반 부도예측, 실시간 EWS, 월세무·상거래데이터 통합 리스크 관리 기능을 비교적 손쉽게 끌어다</p><p>쓸 수 있다.</p><p>반대로 속도가 더디거나 특정 산업군에만 우선 적용되면, 금융사는 자체 AI 레이어를 별도로 구축해야 하는 부담이 커진다.</p><p>국내에선 SAP·오라클·국산 ERP 벤더의 AI 인력투자 추이를 면밀히 모니터링하고, 중복투자를 줄이는 구조 설계가 필요하다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 국내 금융·보험사의 코어뱅킹·ERP·리스크 시스템이 SAP·동류 솔루션에 의존하는 만큼, 이들 벤더의 AI 전환 속도와 인력 구조 변화는 곧 월세무·상거래데이터 통합, CPS 리스크 관리, AI 기반 EWS 도입의 속도와 방향을 제약할 수 있다.</div>
+      </article>
+      <article class="ko-entry" id="finance-3">
+        <div class="ko-entry-head"><span class="source-chip">FinTech Global</span><span class="date-chip near">2026-07-04</span><a class="ko-orig" href="https://fintech.global/2026/07/03/bunch-takes-stake-in-luxembourg-fund-services-in-landmark-deal/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=bunch-takes-stake-in-luxembourg-fund-services-in-landmark-deal" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">AI 네이티브 펀드운영 플랫폼 bunch, 룩셈부르크 펀드 서비스사 지분 인수</h3>
+        <div class="ko-body"><p>bunch는 ‘AI 네이티브’라는 슬로건으로, 사모·벤처·대체투자 펀드의 온보딩, 서류 검증, 자본 호출, 투자자 보고 등을 자동화하는 플랫폼이다.</p><p>이번에 이 회사가 룩셈부르크 펀드 서비스사 LFS의 지분을 인수한 것은 단순 제휴를 넘어, 규제·세무·관리자산(AIFM) 기능과 AI 워크플로를 한 몸처럼 엮겠다는 전략으로 보인다.</p><p>룩셈부르크는 유럽 펀드 허브로 각종 규정과 감독 체계가 촘촘한데, 이 레일 위에 AI 시스템을 심으면 글로벌 자금의 ‘AI 기반 운용·관리’ 확산 속도가 빨라질 수 있다.</p><p>특히 투자자 KYC, AML, 세무 리포팅, 레버리지 한도 관리 등 반복적이고 규칙적인 업무는 LLM·규칙엔진·GNN 조합으로 고도의 자동화가 가능하다.</p><p>TechFin 관점에선 펀드 레벨에서 부동산·상거래·CPS 데이터를 끌어와 실시간 리스크 관리(EWS)를 하는 구조를 떠올릴 수 있다.</p><p>예를 들어 상가 리츠나 프롭테크 펀드에서 월세무·카드매출 데이터를 받아 AI가 공실·매출 급락을 조기 감지하면, 크레디뷰식 채무자 진단·GNN 부도예측이 펀드 단위 리스크 시그널로 승격된다.</p><p>한국에서도 공모·사모펀드 백오피스와 AI 리스크 엔진을 통합하는 유사 모델이 등장할 가능성을 높게 봐야 한다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 장기적으로 국내 월세무·상거래데이터 기반 크레디뷰·부도예측 모델을 펀드·대체투자 리스크 관리에 접목하려면, 이렇게 규제·운영상 레일을 쥔 플랫폼과의 전략적 연계가 필수임을 시사한다.</div>
+      </article>
+      <article class="ko-entry" id="finance-4">
+        <div class="ko-entry-head"><span class="source-chip">PYMNTS</span><span class="date-chip near">2026-07-03</span><a class="ko-orig" href="https://www.pymnts.com/news/artificial-intelligence/2026/ai-curiosity-shop-stocks-fish-wine-hard-lessons/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">‘AI 호기심 상점’: 자율 AI 에이전트가 만든 어이없는 구매 내역이 알려주는 것</h3>
+        <div class="ko-body"><p>기사에서 소개하는 ‘AI 호기심 상점’ 사례들은, 자율 혹은 반자율 AI 에이전트가 실제 결제 수단을 들고 마켓플레이스에서 물건을 사도록 했을 때 어떤 일이 벌어지는지를 보여준다.</p><p>실험에서 에이전트는 업무 관련 물품뿐 아니라, 라이브 베타 물고기, 와인, 쓸모없는 소품 등 사람들이 보기엔 엉뚱해 보이는 물건들을 구매했다.</p><p>하지만 에이전트 내부 로직으로는 설명 가능한 ‘목적 지향적’ 판단이었고, 이 간극이 바로 리스크의 근원이다.</p><p>소비자·기업 입장에서는 예산, 카테고리 제한, 상점 화이트리스트, 일회성 승인 등 다층적 가드레일 없이는 에이전트에게 카드·계정을 온전히 맡기기 어렵다.</p><p>반면 결제 네트워크와 상인에게는 에이전트 친화적 API, 설명 가능한 영수증, 실시간 확인·취소 기능 제공이 새로운 차별화 포인트가 된다.</p><p>TechFin 차원에선 상거래 데이터와 CPS 데이터를 결합해 ‘에이전트 구매 패턴’을 별도 레이어로 분석하고, 비정상 행동을 조기에 잡아내는 GNN 기반 부정·부도 예측 모델을 설계할 수 있다.</p><p>장기적으로는 크레디뷰와 같은 신용 인프라에 ‘AI 에이전트 신뢰 스코어’가 붙는 방향도 염두에 둘 필요가 있다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 카드사·PG·은행은 에이전트 상거래를 위한 별도 한도·룰엔진·EWS 체계를 설계해, 상거래 데이터와 CPS 시그널을 활용한 ‘에이전트 오용·사기 조기경보’ 모델을 구축해야 한다.</div>
+      </article>
+    </section>
+    <section class="company">
+      <div class="company-head"><span class="company-num">📜</span><h2 class="company-name">정책 · 규제 · 거버넌스</h2></div>
+      <article class="ko-entry" id="policy-1">
+        <div class="ko-entry-head"><span class="source-chip">TechCrunch</span><span class="date-chip near">2026-07-05</span><a class="ko-orig" href="https://techcrunch.com/2026/07/04/midjourney-wants-hollywood-studios-to-reveal-the-details-of-their-ai-usage/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">미드저니, 소송 중인 할리우드 스튜디오에 “당신들도 AI 어떻게 쓰는지 공개하라”</h3>
+        <div class="ko-body"><p>TechCrunch에 따르면, 미드저니는 영화사들이 제기한 저작권 침해 소송에서 ‘상대도 AI를 어떻게 활용하는지 밝히라’며 역공에 나섰다.</p><p>스튜디오는 AI가 배우·창작자의 권익을 침해한다고 주장하지만, 실제로는 자체 제작 과정에서 AI 도구를 활용하고 있다는 정황이 있다.</p><p>미드저니는 이를 법정에서 드러내, AI에 대한 이중잣대를 부각하고자 하는 것으로 보인다.</p><p>만약 법원이 스튜디오의 내부 AI 사용 정보를 공개하라고 요구한다면, 이는 앞으로 AI 관련 소송에서 피고·원고 양측 모두의 AI 활용 내역이 쟁점이 되는 선례를 만들 수 있다.</p><p>이 논쟁은 콘텐츠를 넘어 금융·데이터 산업에도 확산될 여지가 크다.</p><p>은행·카드사·핀테크가 고객 데이터를 AI 학습에 어떻게 사용하는지, 내부 리스크 모델·마케팅·가격차별 등에 어디까지 반영하는지에 관한 투명성 요구가 커질 수 있기 때문이다.</p><p>TechFin 관점에서는 월세무·상거래·CPS 데이터로 GNN 부도예측·EWS·크레디뷰를 만들려면, 데이터 소유자에게 명확한 사용 범위와 목적을 설명하고, 향후 2차 활용·모델 업데이트까지 커버하는 동의·공시 체계를 설계해야 한다.</p><p>장기적으로는 ‘AI 활용 설명 가능성’이 금융·데이터 기업의 평판·자본비용에 직접 영향을 줄 것으로 예상된다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 금융·핀테크가 고객 상거래·월세·CPS 데이터를 AI 학습에 활용할수록, ‘어디에 어떻게 쓰는지’에 대한 투명한 공시·동의 체계가 경쟁력이자 규제 리스크 완충 장치가 된다.</div>
+      </article>
+      <article class="ko-entry" id="policy-2">
+        <div class="ko-entry-head"><span class="source-chip">TechCrunch</span><span class="date-chip near">2026-07-05</span><a class="ko-orig" href="https://techcrunch.com/2026/07/04/alibaba-reportedly-bans-employees-from-using-claude-code/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">알리바바, 직원들에 ‘클로드 코드’ 사용 금지…고위험 소프트웨어로 분류</h3>
+        <div class="ko-body"><p>알리바바는 중국 내 클라우드·이커머스·핀테크를 아우르는 초대형 그룹으로, 개발자 규모도 방대하다.</p><p>이 회사가 외부 AI 코딩 도구인 Claude Code를 고위험으로 규정하고 사용 금지한 것은 기술적 문제라기보다</p><p>데이터안보·규제 환경의 산물로 보인다.</p><p>Claude Code에 코드를 붙여넣고 설명·리팩토링을 맡기면, 소스·설계·심지어 비공개 알고리즘 로직이 해외 사업자의 서버로 전송될 수 있다.</p><p>중국 당국이 데이터 국외 이전을 엄격히 통제하는 상황에서, 대형 플랫폼이 선제적으로 리스크를 차단하는 셈이다.</p><p>이 움직임은 글로벌 차원에서 LLM 개발 도구·코파일럿에 대한 신뢰·규제 논의를 촉발시킬 가능성이 있다.</p><p>금융·핀테크 개발조직 역시 카드·상거래·월세·CPS 관련 코드를 외부 LLM에 그대로 올리는 순간 규제·보안 리스크에 노출된다.</p><p>TechFin 관점에서, 크레디뷰·GNN 부도예측·EWS 엔진처럼 핵심 IP가 들어간 코드·데이터는 반드시 온프레미스 혹은 검증된 폐쇄형 환경의 AI 도구로만 다루는 원칙을 세워야 한다.</p><p>동시에 사내 승인 도구 목록을 명시하고, 그 밖의 AI 코딩 도구는 기본적으로 차단하는 ‘화이트리스트 전략’이 현실적인 관리자산 보호 수단이 될 것이다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 금융권 개발조직이 외부 LLM 코딩 도구를 사용할 때도, 소스코드·거래·CPS 데이터 유출 리스크를 전제로 한 엄격한 거버넌스와 사내 ‘화이트리스트형 AI 도구 스택’을 구축해야 한다.</div>
+      </article>
+    </section>
+
+  <footer class="page-footer">
+    한글 상세본 · 자체 작성 · 2026-07-06 · <a href="/ai/archive/2026-07-06.html">카드 요약본</a> · <a href="/ai/">최신 AI 다이제스트</a> · <a href="/">경쟁사 동향</a>
+  </footer>
+
+</div>
+</body>
+</html>
