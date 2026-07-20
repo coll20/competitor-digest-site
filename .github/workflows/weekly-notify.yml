@@ -1,0 +1,48 @@
+name: Weekly Strategy Notify (Kakao + Gmail)
+
+# 주간 전략 리포트 발송. 로컬 weekly-run.sh가 리포트 발행·검증 성공 후
+# workflow_dispatch로 트리거한다(입력: 이번 주 리포트 URL·라벨·날짜·총평 요약).
+# 데일리 notify와 같은 카카오/Gmail 시크릿을 재사용 → 로컬에 토큰 보관 불필요.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "이번 주 리포트 아카이브 URL"
+        required: true
+      label:
+        description: '주차 라벨 (예: "7월 3주차")'
+        required: false
+        default: "주간 전략 리포트"
+      date:
+        description: "보고일 YYYY-MM-DD"
+        required: false
+        default: ""
+      headline:
+        description: "총평 요약(Executive Summary 발췌)"
+        required: false
+        default: ""
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install pynacl
+      - name: Send weekly notifications
+        env:
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_EXTRA_RECIPIENTS: ${{ secrets.GMAIL_EXTRA_RECIPIENTS }}
+          ADMIN_PAT: ${{ secrets.ADMIN_PAT }}
+          WEEKLY_URL: ${{ github.event.inputs.url }}
+          WEEKLY_LABEL: ${{ github.event.inputs.label }}
+          WEEKLY_DATE: ${{ github.event.inputs.date }}
+          WEEKLY_HEADLINE: ${{ github.event.inputs.headline }}
+          WEEKLY_PASSWORD: "techfin2607!"
+        run: python .github/scripts/weekly_notify.py
