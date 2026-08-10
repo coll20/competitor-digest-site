@@ -78,6 +78,16 @@
 - **콘텐츠 소스 변경**(회사/카테고리/게시판/피드): 해당 `scripts/<name>/config.json`만 수정 → commit → push. 다음 cron부터 적용.
 - **수동 즉시 실행**: `gh workflow run <name>.yml --repo coll20/competitor-digest-site` (예: `competitor.yml`). workflow_dispatch.
   - 로컬 테스트: `cd digest-site && OPENAI_API_KEY=… NAVER_CLIENT_ID=… NAVER_CLIENT_SECRET=… OPENAI_MODEL=gpt-5.1 python scripts/<name>/generate.py [--dry-run|--no-openai]`. (로컬은 파일만 쓰고 push 안 함. `--dry-run`=수집·검증만, `--no-openai`=빈 empty-state 생성.)
+- **당일 백필**(생성 실패로 오늘치가 비었을 때): **반드시 순차·이 순서로** — 경쟁사를 마지막에 둬야 그 배포로 트리거되는 notify가 4섹션 모두 채워진 상태로 나간다(동시 실행은 push 충돌 위험).
+  ```bash
+  for wf in douzone.yml fsc.yml ai.yml competitor.yml; do
+    gh workflow run $wf --repo coll20/competitor-digest-site
+    sleep 10
+    id=$(gh run list --repo coll20/competitor-digest-site --workflow=$wf --limit 1 --json databaseId -q '.[0].databaseId')
+    gh run watch $id --repo coll20/competitor-digest-site --exit-status || break
+  done
+  ```
+  각 4~11분, 총 20~30분. `TODAY`는 KST 당일 기준이라 **과거 날짜 백필은 불가**(당일 안에만 유효). 끝나면 notify 로그(`KakaoTalk sent`/`Gmail sent`)와 라이브 4종 manifest의 오늘 날짜를 반드시 검증 — 생성 success ≠ 발송·배포 성공.
 - **디자인/구조 변경**: 각 `generate.py`의 render 함수(템플릿 문자열) 수정. 또는 공유 CSS(`styles.css`, `ai/styles.css` 등).
 - **스케줄 변경**: 각 워크플로의 `schedule.cron`(UTC). 발송 요일을 바꾸려면 경쟁사 cron을 바꾸면 됨(notify는 경쟁사 배포에 종속).
 
@@ -99,6 +109,9 @@
 - **신선도 가드(2026-06-28)**: 섹션 manifest 최신 date ≠ 오늘(KST)이면 카카오·Gmail에 `⚠️ 미갱신` 플래그 후 발송(staleness 방지).
 - Kakao refresh_token rotate 시 `ADMIN_PAT`로 GitHub Secret 자동 갱신.
 
+## 주간 발송 — `weekly-notify.yml` / `weekly_notify.py` (2026-07-20 신설)
+주간 전략 리포트(별도 로컬 시스템, 아래 '관련 시스템' 참조)의 발행 성공 시 로컬 러너가 `gh workflow run weekly-notify.yml`로 트리거 → 데일리와 **같은 카카오/Gmail 시크릿**으로 발송(리포트 URL·총평·비밀번호 안내 포함). 카카오는 "나에게 보내기"(본인 한정), Gmail은 To+BCC. 입력: `-f url= -f label= -f date= -f headline=`. 로컬에 토큰을 두지 않고 refresh_token 자동 회전을 공유하기 위한 설계.
+
 ## 결정론적 게이트 — `.github/scripts/verify_links.py`
 인용 링크(카드 제목·CEO·recap·Sources·kr-src·ko-orig)가 목록/루트/검색/blog URL이면 `exit 1`. 네비게이션(board-link·sidebar-switch·ko-btn·footer·empty-state 내부 링크)은 예외. `deploy.yml`이 변경된 *.html에 대해 실행 → FAIL이면 배포 차단(→notify도 차단). 각 `generate.py`도 push 전 자체 실행.
 
@@ -117,9 +130,11 @@ scripts/
   workflows/{competitor,douzone,fsc,ai}.yml   # 생성(cron, OpenAI)
   workflows/deploy.yml             # push→Netlify(+verify_links 게이트)
   workflows/notify.yml             # 경쟁사 배포완료→카톡+Gmail
+  workflows/weekly-notify.yml      # 주간 전략 리포트 발송(workflow_dispatch, 로컬 러너가 트리거)
   workflows/check-digests.yml      # 07:50 워치독
   scripts/verify_links.py          # 인용링크 게이트
   scripts/notify.py                # Kakao+Gmail+secret 갱신
+  scripts/weekly_notify.py         # 주간 리포트 Kakao+Gmail
   scripts/check_digests.py         # 신선도 점검
 index.html · archive/<date>.html · archive/manifest.json · styles.css · sidebar.js   # 경쟁사(루트)
 ai/ · fsc/ · douzone/             # 각 디제스트(index·archive·manifest·styles·sidebar; ai는 <date>-ko.html도)
@@ -129,11 +144,31 @@ ai/ · fsc/ · douzone/             # 각 디제스트(index·archive·manifest�
 | 증상 | 진단 | 조치 |
 |---|---|---|
 | 특정 digest 안 갱신 | `gh run list --workflow=<name>.yml` 로그 확인(전 단계 로그 보임) | 수집 0건이면 config의 queries/feeds/match 점검; OpenAI 에러면 키/모델/쿼터; push 실패면 ADMIN_PAT |
+| **4종 전부 동시 실패 ①** | 로그에 `openai.RateLimitError: 429 … insufficient_quota` | **OpenAI 크레딧 소진**(07-10·07-27 실제 장애). platform.openai.com 결제/충전 → (키 교체 시 `gh secret set OPENAI_API_KEY`) → 위 백필 절차. 4개가 같은 키를 쓰므로 한 번에 다 죽음 |
+| **4종 전부 동시 실패 ②** | 로그에 `openai.AuthenticationError: 401 … ip_not_authorized` | **조직 IP allowlist가 GH Actions 러너 차단**(07-21 실제 장애). 키 재발급으론 해결 안 됨(제한이 조직/프로젝트 단위) — **IP 제한 없는 별도 OpenAI 프로젝트의 키**로 교체(project-level coverage가 org-level을 override) → 백필 |
 | 카톡/메일 안 옴 | notify.yml 실패 또는 경쟁사 배포가 "Daily digest:"로 안 됐는지 | notify 로그 → Kakao refresh_token·GMAIL_APP_PASSWORD 확인 |
+| notify가 "skipped" | ⚠ **정상** — 더존/FSC/AI 배포에도 workflow_run은 걸리지만 커밋 접두 검사에서 걸러짐 | 하루 4번 중 경쟁사 배포 1건만 success면 정상. 4건 다 skipped면 경쟁사 커밋 접두 확인 |
+| check-digests가 "failure" | ⚠ **오작동 아님** — 누락 감지 시 경보 메일 발송 후 의도적으로 exit 1 | 로그에 경보 발송 완료가 있으면 워치독은 정상. 진짜 문제는 누락된 생성 워크플로 쪽 |
 | 배포 실패 "citation link" | verify_links 게이트가 루트/목록/검색/blog 인용 발견 | 로그의 bad URL을 개별 기사 URL로 교체 또는 항목 제거(보통 config·프롬프트 튜닝) |
 | 07:50 경보 메일 | 워치독이 오늘치 누락 감지 | 해당 digest 워크플로 로그 확인 후 `gh workflow run <name>.yml`로 수동 보충 |
+| 메일만 안 옴 | Gmail App Password revoke 가능성 | myaccount.google.com/apppasswords 재발급 → secret 갱신 |
+
+## 운영 caveat (실측 기반)
+- **GitHub Actions schedule은 부하 시간대 ~1시간 지연이 상시**(07-10 실측: 경쟁사 22:00→23:10 UTC 발화). 07:50 워치독 경보가 08~09시에 와도 이상 아님. 생성이 밀리면 notify·워치독도 연쇄로 밀림.
+- **OpenAI 조직 IP allowlist는 GH Actions와 양립 불가** — 러너 대역이 CIDR 7,000+개·매주 갱신이라 등록 불가(OpenAI 한도 5,000). 이 repo의 키는 반드시 **IP 제한 없는 별도 프로젝트**에서 발급·유지할 것.
+- **OpenAI 크레딧은 조용히 소진된다** — 4종이 키 하나를 공유하므로 잔액 0 = 그날 브리핑 전멸(워치독은 사후 감지). 예방책은 platform.openai.com의 usage-limit 이메일 알림뿐.
+- **manifest `label` 필드**는 수동 override 전용(사이드바 표시명). 생성 스크립트는 다른 엔트리의 label을 보존한다.
+- **네이버 검색 API**(openapi.naver.com)는 정식 REST API라 어디서든 동작(무료 일 25,000회). 반환 `originallink`=실제 언론사 기사 URL.
+
+## 관련 시스템 (이 repo를 소비하는 것들)
+- **주간 전략 리포트**(매주 월, techfin-weekly-strategy-2607.netlify.app): 로컬(WSL) 시스템이 이 repo의 4종 다이제스트 1주일치를 읽어 사내 현안과 교차 분석. 발송만 이 repo의 `weekly-notify.yml`을 빌려 씀.
+- **다이제스트 워크에이전트**(techfin-levelup.netlify.app, private repo `coll20/techfin-workagent`): 매일 08:40 KST GH Actions가 `DIGEST_PAT`으로 이 repo를 체크아웃해 당일 뉴스를 추출·개인화. 08:40인 이유 = 이 repo의 cron ~1h 지연을 회피.
 
 ## 작업 로그
+- **2026-07-27**: **OpenAI 크레딧 재소진 장애 → 충전·백필 (복구 완료).** 07-10과 동일 패턴 — `429 insufficient_quota`로 07-25 경쟁사부터 실패, 07-26~27 4종 전멸(워치독 경보는 정상 발송). 크레딧 충전 → curl 실호출 검증 → 순차 백필(더존→FSC→AI→경쟁사) → notify 카톡+Gmail 발송 확인. **07-25·07-26 이틀치는 결번**(TODAY=KST 당일 기준이라 과거 백필 불가).
+- **2026-07-21**: **OpenAI 조직 IP allowlist 장애 → 별도 프로젝트 키 교체·백필 (복구 완료).** 4종 전부 `401 ip_not_authorized`(장애 직전 조직 레벨 IP allowlist 활성화가 원인). 같은 조직 키 재발급은 실패(제한이 키 단위가 아님), GH 러너 대역 등록도 불가(CIDR 7,208 vs 한도 5,000) → **IP 제한 없는 별도 프로젝트에서 키 발급**으로 해결, 백필·notify 검증 완료.
+- **2026-07-20**: **`weekly-notify.yml`/`weekly_notify.py` 신설** — 주간 전략 리포트 발송을 이 repo의 Actions로 수행(데일리와 카카오/Gmail 시크릿 공유, refresh_token 자동 회전 일원화).
+- **2026-07-10**: **OpenAI 크레딧 소진 장애 → 키 교체·백필 (복구 완료).** 4종 전부 `429 insufficient_quota`. 신규 키 교체 → 순차 백필 17분 → notify 발송 확인. 트러블슈팅 표의 '4종 동시 실패'·'워치독 failure≠오작동'·'notify skipped=정상' 항목과 백필 절차가 이 장애의 산물. 스케줄 ~1h 지연도 이날 실측.
 - **2026-06-29**: **전체 시스템 리팩토링 — Anthropic 루틴 → GitHub Actions + OpenAI**
   - 계기: 옛 Anthropic 루틴들이 06-27~29 전부 생성 실패(루틴은 fire되나 push 0건). 근본 원인은 push 단계가 아니라 생성 단계(불투명 루틴의 조용한 실패). 사용자가 전면 리팩토링 결정.
   - 새 구조: 4개 digest 각각 GitHub Actions cron + Python 스크립트. 수집(Naver/fsc.go.kr/RSS)은 결정론적, OpenAI는 글쓰기만, 렌더도 코드. 공유 `digestlib.py`. verify_links 게이트·화이트리스트 가드·NO_CHANGES 실패·하드닝 push 유지. 4개 전부 로컬 + GH dispatch로 실환경 검증(competitor production·douzone·fsc·ai 모두 success).
