@@ -129,9 +129,10 @@ def main():
                 st = update_github_secret(REPO, "KAKAO_REFRESH_TOKEN", new_refresh, admin_pat)
                 print(f"      ✓ refresh_token rotate → GH secret 갱신(HTTP {st})")
             except Exception as e:
-                print(f"::error::refresh_token rotate 됐으나 secret 갱신 실패: {e}\n수동 갱신값:\n{new_refresh}")
+                # 공개 repo — 토큰 값을 로그에 절대 출력하지 않는다. 재인증으로 복구(로컬 노트 4.7절).
+                print(f"::error::refresh_token rotate 됐으나 secret 갱신 실패: {e} — 토큰은 공개 로그라 미출력. 카카오 OAuth 재인증 후 KAKAO_REFRESH_TOKEN 수동 갱신 필요.")
         else:
-            print(f"::warning::refresh_token rotate 됐으나 ADMIN_PAT 없음. 수동 갱신값:\n{new_refresh}")
+            print("::warning::refresh_token rotate 됐으나 ADMIN_PAT 없음 — 토큰은 공개 로그라 미출력. 카카오 OAuth 재인증 후 KAKAO_REFRESH_TOKEN 수동 갱신 필요.")
     else:
         print("      (refresh_token 유효, rotate 불필요)")
 

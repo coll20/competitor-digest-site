@@ -221,14 +221,17 @@ def main():
                 status = update_github_secret(REPO, "KAKAO_REFRESH_TOKEN", new_refresh, admin_pat)
                 print(f"      ✓ Kakao rotated refresh_token — auto-updated GH secret (HTTP {status})")
             except Exception as e:
+                # 공개 repo — 토큰 값을 로그에 절대 출력하지 않는다. 재인증으로 복구(로컬 노트 4.7절).
                 print(
                     f"::error::Kakao rotated refresh_token but auto-update FAILED: {e}\n"
-                    f"Manually update GH secret KAKAO_REFRESH_TOKEN with:\n{new_refresh}"
+                    "Token NOT printed (public logs). Re-authenticate Kakao OAuth and set "
+                    "KAKAO_REFRESH_TOKEN manually."
                 )
         else:
             print(
                 "::warning::Kakao rotated refresh_token; ADMIN_PAT not set. "
-                f"Manually update GH secret KAKAO_REFRESH_TOKEN with:\n{new_refresh}"
+                "Token NOT printed (public logs). Re-authenticate Kakao OAuth and set "
+                "KAKAO_REFRESH_TOKEN manually."
             )
     else:
         print("      (refresh_token still valid, no rotation needed)")
