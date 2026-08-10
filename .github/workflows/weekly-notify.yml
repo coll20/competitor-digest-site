@@ -44,5 +44,5 @@ jobs:
           WEEKLY_LABEL: ${{ github.event.inputs.label }}
           WEEKLY_DATE: ${{ github.event.inputs.date }}
           WEEKLY_HEADLINE: ${{ github.event.inputs.headline }}
-          WEEKLY_PASSWORD: "techfin2607!"
+          WEEKLY_PASSWORD: ${{ secrets.WEEKLY_PASSWORD }}
         run: python .github/scripts/weekly_notify.py

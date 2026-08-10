@@ -9,7 +9,7 @@
   WEEKLY_LABEL     예: "7월 3주차"
   WEEKLY_DATE      예: "2026-07-20"
   WEEKLY_HEADLINE  총평 요약(Executive Summary verdict 발췌). 없으면 라벨만.
-  WEEKLY_PASSWORD  사이트 접속 비밀번호(기본 techfin2607!)
+  WEEKLY_PASSWORD  사이트 접속 비밀번호(GitHub Secret, 미설정 시 메시지에서 생략)
 시크릿(env):
   KAKAO_REST_API_KEY, KAKAO_REFRESH_TOKEN, GMAIL_USER, GMAIL_APP_PASSWORD,
   GMAIL_EXTRA_RECIPIENTS(옵션), ADMIN_PAT(옵션 — 카카오 refresh_token rotate 시 GH secret 갱신)
@@ -117,7 +117,7 @@ def main():
     label = os.environ.get("WEEKLY_LABEL", "").strip() or "주간 전략 리포트"
     date = os.environ.get("WEEKLY_DATE", "").strip()
     headline = os.environ.get("WEEKLY_HEADLINE", "").strip()
-    password = os.environ.get("WEEKLY_PASSWORD", "techfin2607!").strip()
+    password = os.environ.get("WEEKLY_PASSWORD", "").strip()  # GH secret WEEKLY_PASSWORD (미설정 시 메시지에서 생략)
 
     # ---- Kakao access token (+ rotate) ----
     print("[1/3] Refreshing Kakao access token...")
@@ -142,7 +142,9 @@ def main():
         kakao_text += f" ({date})"
     if hl:
         kakao_text += f"\n\n{hl}"
-    kakao_text += f"\n\n🔒 접속 비밀번호: {password}\n🔗 {url}"
+    if password:
+        kakao_text += f"\n\n🔒 접속 비밀번호: {password}"
+    kakao_text += f"\n🔗 {url}"
 
     print("[2/3] Sending KakaoTalk...")
     where = send_kakao_with_fallback(access_token, kakao_text, url)
@@ -168,9 +170,7 @@ def main():
         🔗 주간 전략 리포트 열기
       </a>
     </p>
-    <p style="font-size:13px;color:#555;background:#fff8e1;padding:10px 14px;border-radius:8px;border-left:3px solid #e3b341;margin:0 0 8px;">
-      🔒 사이트 전체 비밀번호 보호 — 접속 비밀번호: <b>{password}</b>
-    </p>
+    {f'<p style="font-size:13px;color:#555;background:#fff8e1;padding:10px 14px;border-radius:8px;border-left:3px solid #e3b341;margin:0 0 8px;">🔒 사이트 전체 비밀번호 보호 — 접속 비밀번호: <b>{password}</b></p>' if password else ''}
     <p style="font-size:12px;color:#999;margin:28px 0 0;border-top:1px solid #eee;padding-top:16px;">
       매주 월요일 자동 발행 · 4종 데일리 다이제스트 전수 추출 × 사내 현안 교차 분석<br>대외비(Confidential) · 외부 공유 금지
     </p>
