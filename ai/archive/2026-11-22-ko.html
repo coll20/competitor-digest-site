@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-11-22 AI 다이제스트 — 한글 상세</title>
+<meta name="description" content="2026-11-22 글로벌 AI 기술 동향 한글 상세 — 비자·엔비디아·바이트댄스가 보여준 AI 결제·인프라·학습 혁신, 그리고 에이전트 시대의 프라이버시 전쟁">
+<link rel="stylesheet" href="/ai/styles.css">
+</head>
+<body>
+<div class="ko-wrap">
+
+  <header class="hero">
+    <span class="eyebrow ko-eyebrow">🇰🇷 한글 상세 · 2026-11-22</span>
+    <h1>글로벌 AI 기술 동향 — 한글 상세 해설</h1>
+    <p class="meta">기간: <strong>2026-11-16 ~ 2026-11-22</strong> · 카드 한국어 해설 · 테크핀레이팅스 인사이트 포함</p>
+    <nav class="ko-backlinks">
+      <a class="ko-btn" href="/ai/archive/2026-11-22.html">← 카드 요약본으로</a>
+      <a class="ko-btn ghost" href="/ai/">최신 AI 다이제스트</a>
+    </nav>
+  </header>
+
+  <div class="notice">
+    본문 한글은 전문 번역이 아니라 <strong>테크핀레이팅스 자체 작성 요약·해설</strong>이며 정확한 원문은 각 항목 '원문 보기' 링크를 참고하시기 바랍니다.
+  </div>
+
+    <section class="company">
+      <div class="company-head"><span class="company-num">🌐</span><h2 class="company-name">프론티어 모델 &amp; 빅테크</h2></div>
+      <article class="ko-entry" id="frontier-1">
+        <div class="ko-entry-head"><span class="source-chip">The Decoder</span><span class="date-chip near">2026-11-21</span><a class="ko-orig" href="https://the-decoder.com/bytedance-argues-most-ai-training-phases-are-unnecessary-and-backs-it-up-with-a-competitive-open-model/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">바이트댄스 “불필요한 학습 단계 줄여도 최첨단 성능 가능”…Axion 1.0 공개</h3>
+        <div class="ko-body"><p>Axion 1.0 프로젝트는 기존 LLM 파이프라인이 프리트레이닝·중간태스크 튜닝·지식 증류·안전성 튜닝 등 수많은 단계를 거치는 관행에 의문을 제기한다.</p><p>연구진은 불필요한 단계를 제거하고, 사전 학습·지시튜닝·안전성 조정 등 최소한의 3단계만 유지한 뒤, 대신 데이터 필터링과 커리큘럼 설계를 정교하게 다듬었다.</p><p>그 결과, 컴퓨팅 비용과 개발 기간을 줄이면서도 Q&amp;A·코딩·에이전트 벤치마크에서 상용 최고 모델과 비슷한 수준의 성능을 달성했다고 보고한다.</p><p>모든 자산을 오픈소스로 풀어 학계·산업계가 실험을 반복할 수 있도록 한 점도 특징이다.</p><p>이는 GPU·전력·예산이 제한된 기업, 특히 규제가 엄격한 금융·헬스케어에서 ‘작지만 똑똑한’ 사내용 모델 전략을 뒷받침한다.</p><p>국내 금융사는 대형 범용 모델을 그대로 쓰기보다, 자체 월세무·상거래·거래 위험데이터를 활용해 목적 특화 경량 모델을 운용하는 하이브리드 전략을 검토할 만하다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 데이터 수집이 풍부한 금융권은, 비밀유지된 고품질 도메인 데이터로 경량 모델을 학습해 비용 효율적 크레디뷰·부도예측·규제 보고용 모델을 내재화할 여지가 커진다.</div>
+      </article>
+      <article class="ko-entry" id="frontier-2">
+        <div class="ko-entry-head"><span class="source-chip">The Decoder</span><span class="date-chip near">2026-11-21</span><a class="ko-orig" href="https://the-decoder.com/new-open-model-inkling-2-mini-thinks-in-loops-to-solve-problems-with-fewer-words-and-still-runs-on-a-laptop/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">오픈모델 Inkling 2 Mini, ‘루프형 사고’로 더 적은 토큰으로 추론</h3>
+        <div class="ko-body"><p>전통적인 트랜스포머는 입력·출력을 따라 한 번의 패스만을 수행하지만, Inkling 2 Mini는 일부 레이어를 여러 번 순환시키며 ‘내부 독백’을 늘리는 구조를 택했다.</p><p>이로써 모델은 정답을 내기 전, 같은 정보에 대해 여러 번 다른 관점에서 연산을 수행해 더 일관된 추론에 도달하려 한다.</p><p>사용자는 별도의 체인 오브 소트(CoT) 프롬프트를 길게 쓰지 않아도, 모델이 내부적으로 충분히 생각하도록 설계된 셈이다.</p><p>성능 지표에서 이 모델은 훨씬 더 큰 파라미터를 가진 Qwen3.8 27B와 비슷한 수준의 지능 점수를 기록했지만, 필요한 연산량과 토큰 수는 크게 낮았다.</p><p>오픈소스이자 랩톱에서도 구동 가능하다는 점은, 온프레미스·에지 환경에서의 프라이버시 요구가 높은 산업에 유리하다.</p><p>금융기관은 이를 활용해 민감 데이터를 외부로 내보내지 않고도 상담봇·내부 규정 질의응답·리스크 리포트 초안 작성 등 업무를 지원할 수 있다.</p><p>특히 토큰 기반 과금 구조에서, ‘짧게 말해도 잘 이해하는 모델’은 곧 직접적인 비용 절감으로 이어지기 때문에, 이런 구조적 혁신은 실무 경제성에 직결된다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 토큰 절감형 고추론 모델은 콜센터 요약·상담 스크립트 생성, CPS 기반 이상거래 설명 등 대량 텍스트 처리 금융 업무의 비용 구조를 크게 낮출 수 있다.</div>
+      </article>
+    </section>
+    <section class="company">
+      <div class="company-head"><span class="company-num">🔧</span><h2 class="company-name">인프라 · 반도체 · 컴퓨트</h2></div>
+      <article class="ko-entry" id="infra-1">
+        <div class="ko-entry-head"><span class="source-chip">The Decoder</span><span class="date-chip near">2026-11-22</span><a class="ko-orig" href="https://the-decoder.com/nvidia-researchers-argue-huge-ai-context-windows-are-a-dead-end/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">엔비디아 연구진 “초대형 컨텍스트 윈도우는 비용 낭비…요약·검색이 해법”</h3>
+        <div class="ko-body"><p>최근 빅테크와 스타트업은 ‘100만 토큰 컨텍스트’ 같은 수치를 내세우며 모델 경쟁을 벌여 왔다.</p><p>그러나 엔비디아 팀은 실제 현실 업무에서는 대부분의 프롬프트가 그 길이를 거의 사용하지 않고, 오히려 긴 입력이 연산 비용과 오류율을 키운다고 지적한다.</p><p>논문에서는 문서·대화가 길어질수록 과거 정보를 주기적으로 요약해 메모로 남기고, 필요 시 키워드 검색·벡터 검색으로 관련 부분만 다시 불러오는 전략을 실험했다.</p><p>그 결과 질문응답·코딩·추론 과제에서 전체 텍스트를 그대로 넣은 경우와 거의 동등한 성능을, 몇 분의 1 비용과 지연으로 달성했다고 한다.</p><p>연구진은 이를 바탕으로, 인간의 단기·장기 기억처럼 구조화된 ‘외부 메모리’를 전제로 설계된 새 모델 패밀리를 제안한다.</p><p>이런 접근은 로그가 길고 규제가 많은 금융·공공 분야에서 특히 의미가 크다.</p><p>국내 금융사는 콜로그·거래내역·상담 기록을 전부 LLM에 넣으려 하기보다, 도메인 특화 요약 규칙과 검색 인덱스를 설계해 효율적인 메모리 계층을 만드는 것이 비용·성능 면에서 유리하다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 거래·상거래·월세무 등 초장기 시계열 데이터를 쓰는 금융 AI는 전체 로그를 넣기보다, CPS·요약·벡터검색을 조합한 메모리 설계로 비용·지연을 줄여야 한다.</div>
+      </article>
+    </section>
+    <section class="company">
+      <div class="company-head"><span class="company-num">🧩</span><h2 class="company-name">에이전트 · 오픈소스 · 개발</h2></div>
+      <article class="ko-entry" id="agents-1">
+        <div class="ko-entry-head"><span class="source-chip">PYMNTS</span><span class="date-chip near">2026-11-20</span><a class="ko-orig" href="https://www.pymnts.com/news/artificial-intelligence/2026/apple-expands-team-building-privacy-first-ai-agent/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">애플, ‘프라이버시 우선’ AI 에이전트 팀 대폭 확충</h3>
+        <div class="ko-body"><p>애플은 공고에서 “능력 있는 사람이 컴퓨터를 쓰는 것처럼 동작하는 AI 에이전트”를 언급하며, 단순 챗봇이 아닌 완전한 ‘디지털 비서’를 지향하고 있음을 분명히 했다.</p><p>이는 사용자의 캘린더 조정, 파일 정리, 이메일 답장, 앱 간 데이터 이동 등 복합적 업무를 자동 처리하는 기능을 포함할 것으로 보인다.</p><p>다만 애플은 기존 시리의 한계를 인식하고, 프라이버시와 신뢰를 차별점으로 삼으려 한다.</p><p>온디바이스 모델과 프라이빗 클라우드 조합을 통해, 사용 이력과 민감 데이터를 외부 학습에 쓰지 않는 구조를 설계 중이라는 점을 시사한다.</p><p>이는 구글 Gemini가 맥을 직접 조작하고, 오픈AI가 윈도우 에이전트를 준비하는 등 빅테크 간 ‘PC/디바이스 조작 에이전트’ 경쟁 구도 속에서 의미가 크다.</p><p>금융 관점에서는 에이전트가 인터넷 뱅킹, 트레이딩, 대출 신청 등을 자동으로 수행할 수 있어 편의성과 동시에 오남용 리스크가 커진다.</p><p>금융사는 OS 에이전트에 대한 별도 OTP·위험기반 인증(RBA) 정책, 일일·거래별 한도, 세션 추적 로깅을 설계해 ‘사람과 에이전트를 구분한 보안 계층’을 마련해야 한다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 금융 앱이 애플 에이전트와 연동될 경우 계좌조회·결제·투자까지 OS 레벨 자동화가 가능해지므로, 은행·핀테크는 에이전트 권한·한도·세션 관리를 새 보안 계층으로 설계해야 한다.</div>
+      </article>
+      <article class="ko-entry" id="agents-2">
+        <div class="ko-entry-head"><span class="source-chip">PYMNTS</span><span class="date-chip near">2026-11-20</span><a class="ko-orig" href="https://www.pymnts.com/news/artificial-intelligence/2026/googles-gemini-app-can-now-operate-apple-desktop-computers/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">구글 Gemini, 이제 맥 데스크톱 앱·파일까지 원격 조작</h3>
+        <div class="ko-body"><p>Gemini의 새 기능은 단순 문서 생성이나 검색 보조를 넘어, 사용자의 맥에서 실제로 앱을 실행하고 마우스·키보드 입력을 대체하는 수준에 이르렀다.</p><p>사용자는 자연어로 업무 목표를 제시하고, 에이전트는 필요한 앱을 열고 파일을 찾으며, 브라우저로 정보를 수집해 결과물을 저장·전달한다.</p><p>구글은 이를 통해 반복 업무 시간을 줄이고, 사용자는 고부가가치 업무에 집중할 수 있다고 강조한다.</p><p>하지만 이 기능은 동시에 보안·프라이버시 우려를 키운다.</p><p>에이전트가 실수로 잘못된 파일을 전송하거나, 권한 밖 시스템에 접근할 경우 피해 규모가 클 수 있기 때문이다.</p><p>특히 금융·의료·공공기관처럼 로컬 PC에 민감 정보가 저장된 환경에서는, 에이전트의 권한·로그·행위제한이 핵심 설계 과제가 된다.</p><p>기업은 에이전트 활동을 세밀하게 모니터링하고, 대량 파일 전송·비정상적 앱 조합 실행 등을 실시간 탐지하는 컨트롤이 필요하다.</p><p>장기적으로는 데스크톱 에이전트 행위를 학습·모델링해, 내부자 위협·권한 오남용을 조기에 포착하는 EWS로도 활용할 수 있다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 금융기관 내부 PC·백오피스 시스템에서도 데스크톱 에이전트가 도입되면, 고객정보·거래입력 자동화와 함께 내부통제·행위기반 이상탐지(EWS)를 재설계해야 한다.</div>
+      </article>
+      <article class="ko-entry" id="agents-3">
+        <div class="ko-entry-head"><span class="source-chip">The Decoder</span><span class="date-chip near">2026-11-21</span><a class="ko-orig" href="https://the-decoder.com/signal-blocks-screenshots-on-ios-27-and-android-to-stop-ai-agents-from-reading-private-chats/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">시그널, AI 에이전트의 대화 읽기 막으려 iOS·안드로이드 스크린샷 차단</h3>
+        <div class="ko-body"><p>생성형 에이전트 확산 이후, 시리·Gemini·코파일럿·Muse 같은 도구들은 화면 내용을 인식해 요약·자동 응답을 제공하는 기능을 내세우고 있다.</p><p>시그널은 이런 기능이 암호화 메신저의 기본 전제인 ‘종단 간 보호’를 우회하는 통로가 된다고 우려한다.</p><p>암호화는 네트워크 경로와 서버에서의 엿보기를 막지만, 화면이 사용자 단말에 표시된 이후에는 OS·다른 앱이 캡처할 수 있기 때문이다.</p><p>이번 조치는 통신 앱 차원에서 가능한 최소한의 방어로, 스크린샷 자체를 제한함으로써 에이전트가 이미지를 통해 내용을 읽는 것을 어렵게 만든다.</p><p>하지만 사용자가 다른 기기로 사진을 찍거나, 데스크톱 버전을 사용하면 여전히 취약점이 존재한다.</p><p>결국 근본 해결책은 OS 레벨에서의 ‘민감 콘텐츠 보호 모드’와 에이전트의 권한 제한 설계로 귀결된다.</p><p>금융 앱 역시 계좌 상세·카드번호·인증 화면 등에는 캡처 방지·흐림 처리 등 다계층 보호를 도입해야 하고, 앞으로는 에이전트 API가 이 영역에 접근하지 못하도록 별도의 권한 체계를 두어야 한다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 금융 앱은 스크린샷·화면 캡처를 통한 계좌·카드 정보 유출을 AI 에이전트까지 고려해 재점검하고, 세션 기반 화면보호·마스킹 설계를 강화해야 한다.</div>
+      </article>
+    </section>
+    <section class="company">
+      <div class="company-head"><span class="company-num">🏦</span><h2 class="company-name">금융 · 신용 · 핀테크 AI</h2></div>
+      <article class="ko-entry" id="finance-1">
+        <div class="ko-entry-head"><span class="source-chip">PYMNTS</span><span class="date-chip near">2026-11-21</span><a class="ko-orig" href="https://www.pymnts.com/news/artificial-intelligence/2026/ai-vendors-ditch-seat-licenses-per-agent-pricing/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">AI 소프트웨어, ‘좌석 라이선스’ 버리고 에이전트 단위 과금으로 이동</h3>
+        <div class="ko-body"><p>좌석 라이선스는 직원 수에 비례해 과금하는, 전통적인 엔터프라이즈 소프트웨어 모델이다.</p><p>그러나 LLM 기반 시스템에서는 사람이 아니라 수십·수백 개 AI 에이전트가 업무를 대신 수행하면서, 더 이상 사람 수가 비용의 좋은 프록시가 되지 않는다.</p><p>화이트매터는 각 운영 에이전트를 감시하는 ‘가디언’ 에이전트를 도입해, 에이전트 하나당 하나의 통제 포인트와 과금 단위를 만든다.</p><p>이런 구조는 거버넌스·리스크 관리·책임 추적을 가격과 직접 연결해, 통제되지 않은 에이전트 확산을 억제하는 효과도 있다.</p><p>반면, 잘 설계하지 않으면 예측하기 어려운 비용 폭증과 ‘에이전트만 늘어나는’ 비효율이 발생할 수 있다.</p><p>금융사는 RPA 봇과 마찬가지로, 계정·권한·로그를 에이전트 단위로 관리하며 리소스·요금 최적화를 동시에 설계해야 한다.</p><p>장기적으로는 P&amp;L, 인당 생산성 지표에 ‘직원당’이 아니라 ‘직원+에이전트 당’ 개념이 들어갈 가능성이 크다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 금융·핀테크에서도 크레디뷰형 심사봇, 부도예측 GNN 에이전트, EWS 감시 에이전트 등 ‘AI 인력단위’ 원가 계산과 수익성 관리 체계가 필요해진다.</div>
+      </article>
+      <article class="ko-entry" id="finance-2">
+        <div class="ko-entry-head"><span class="source-chip">FinTech Global</span><span class="date-chip near">2026-11-20</span><a class="ko-orig" href="https://fintech.global/2026/11/20/unlimit-tests-ai-agent-payments-with-visa-across-180-markets/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=unlimit-tests-ai-agent-payments-with-visa-across-180-markets" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">비자·Unlimit, 180개국서 AI 에이전트 결제 테스트</h3>
+        <div class="ko-body"><p>비자의 Agentic Ready Program은 AI 에이전트가 결제 인프라를 사용할 준비가 되어 있는지를 네트워크 관점에서 점검하는 프로그램이다.</p><p>Unlimit은 180개국에 걸친 광범위한 결제 라우팅·현지화 역량을 갖추고 있어, 다양한 통화·규제·KYC 요건 아래서 에이전트 결제가 어떻게 작동하는지 데이터를 수집하게 된다.</p><p>테스트 항목에는 에이전트가 고객의 동의를 어떻게 기록·갱신하는지, 결제 실패·취소·차지백 상황을 어떻게 처리하는지도 포함될 가능성이 크다.</p><p>특히 자동 반복 결제, BNPL, 지연 결제 등 복잡한 상품에서 에이전트의 역할과 책임 범위가 규제 측면에서 쟁점이 될 수 있다.</p><p>소비자 피해 발생 시 에이전트·발급사·가맹점·네트워크 중 누가 책임을 지는지도 조기 설계가 필요하다.</p><p>국내사 입장에서는 추후 이와 유사한 프로그램 참여 여부가 글로벌 에이전트 상거래 생태계 편입 여부를 가를 수 있다.</p><p>지금부터 에이전트용 토큰화·동의관리·위험기반 인증 체계를 설계해 두는 것이 중요하다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 향후 월세무·정기구독·상거래 자동 결제까지 에이전트가 전담하게 되면, 카드사와 핀테크는 CPS 기반 이상거래 탐지·소비패턴 예측 모델을 에이전트 행동 데이터까지 확장해야 한다.</div>
+      </article>
+      <article class="ko-entry" id="finance-3">
+        <div class="ko-entry-head"><span class="source-chip">FinTech Global</span><span class="date-chip near">2026-11-20</span><a class="ko-orig" href="https://fintech.global/2026/11/20/visionx-ai-bets-on-graph-ai-to-expose-hidden-crime-networks/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=visionx-ai-bets-on-graph-ai-to-expose-hidden-crime-networks" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">VisionX AI, 대규모 그래프 AI로 숨은 금융 범죄 네트워크 잡는다</h3>
+        <div class="ko-body"><p>AEGIS는 ‘Large Graph Model(LGM)’이라는 이름에서 알 수 있듯, 텍스트가 아닌 그래프 구조에 특화된 대형 AI 모델이다.</p><p>은행과 핀테크에서 나오는 송금·카드 결제·계좌 개설·디바이스·IP·주소 데이터 등을 노드와 엣지로 연결하여 거대한 금융 관계망을 구축한다.</p><p>TraceX는 이 위에 구축된 첫 제품으로, AML 분석가가 네트워크 구조를 시각화하고 의심스러운 패턴을 탐지하는 도구다.</p><p>하나의 송금을 ‘정상/비정상’으로만 보는 것이 아니라, 다수의 소액 송금이 허브 계좌로 모여 다시 분산되는 ‘레이어링’ 패턴 등 네트워크 차원의 특징을 잡아낸다.</p><p>최근 글로벌 규제기관들은 단일 거래 규칙을 넘어, 고객·관계·행동 기반 리스크 평가를 강조하고 있어 이런 기술 도입 압력이 커지고 있다.</p><p>단, 그래프 AI의 복잡성과 블랙박스성은 설명가능성·감사 추적·오탐비용 관리 측면에서 새로운 과제를 낳는다.</p><p>국내 금융기관은 KYC·거래·외부 데이터 통합을 선행하고, 소규모 샌드박스 환경에서 그래프 기반 모델을 단계적으로 검증하는 전략이 현실적이다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 국내 금융·핀테크의 EWS와 부도예측, AML 시스템도 거래 단위에서 네트워크 단위로 패러다임을 전환하고, CPS·GNN 기반 리스크 모델을 실운영에 도입할 필요가 있다.</div>
+      </article>
+      <article class="ko-entry" id="finance-4">
+        <div class="ko-entry-head"><span class="source-chip">FinTech Global</span><span class="date-chip near">2026-11-20</span><a class="ko-orig" href="https://fintech.global/2026/11/20/80-of-mid-sized-fs-firms-fear-falling-behind-on-ai/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=80-of-mid-sized-fs-firms-fear-falling-behind-on-ai" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">중형 금융사의 80% “AI 경쟁에서 뒤처지고 있다”</h3>
+        <div class="ko-body"><p>조사 결과에서 중형 금융사는 AI를 ‘전략적 필수’로 인식하면서도, 예산과 인력이 한정적이어서 PoC(개념검증) 수준에 머무는 경우가 많았다.</p><p>자체 데이터 사이언스 조직을 꾸리자니 채용 경쟁에서 대형사·빅테크에 밀리고, 외부 파트너에 의존하자니 프로젝트 단가와 벤더 종속이 부담이 된다.</p><p>규제 측면에서도 모델 리스크 관리(MRM), 데이터 거버넌스, 프라이버시 요구가 높아지면서, 내부 통제 체계를 먼저 정비하느라 실제 AI 배포는 늦어지는 악순환이 발생하고 있다.</p><p>특히 신용평가·사기 탐지·자금세탁방지 등 고위험 영역은 ‘실패 비용’이 커서 더욱 보수적으로 접근하는 경향이 강하다.</p><p>보고서는 이런 한계를 해소하려면 재사용 가능한 AI 컴포넌트, 클라우드형 AI 플랫폼, 산업별 공통 데이터 모델을 도입해 구현 비용을 나누는 협력 모델이 필요하다고 제안한다.</p><p>국내에서도 금융 유틸리티, 공동 FDS, 공동 부도예측 모델 등 이미 존재하는 협력 구조를 ‘생성형+그래프 AI’까지 확장하는 방식으로 격차를 줄일 수 있다.</p><p>중형사는 선택과 집중을 통해, 예를 들어 크레디뷰식 심사 자동화나 CPS 기반 고객 360도 분석 등 효과가 큰 1~2개 영역부터 공략하는 전략이 중요하다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 중형 금융사는 월세무·상거래데이터·CPS·GNN 등 고도 기법을 모두 내재화하기보다, 공용 데이터·모델 플랫폼을 공동 조달하거나 ‘AI 유틸리티’ 전략으로 효율을 높이는 게 현실적이다.</div>
+      </article>
+    </section>
+    <section class="company">
+      <div class="company-head"><span class="company-num">📜</span><h2 class="company-name">정책 · 규제 · 거버넌스</h2></div>
+      <article class="ko-entry" id="policy-1">
+        <div class="ko-entry-head"><span class="source-chip">Ars Technica</span><span class="date-chip near">2026-11-18</span><a class="ko-orig" href="https://arstechnica.com/ai/2026/11/google-will-let-you-opt-out-of-ai-training-in-gemini-without-losing-your-history/" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">구글, Gemini에서 대화 기록 유지하면서도 AI 학습 옵트아웃 허용</h3>
+        <div class="ko-body"><p>이번 변경의 핵심은 ‘대화 기록 관리’와 ‘모델 학습 참여’를 완전히 분리했다는 점이다.</p><p>사용자는 Gemini 설정에서 기록을 유지해 스마트 제안·컨텍스트 보존 등 편의를 누리면서도, 별도의 토글을 꺼서 해당 데이터를 향후 모델 학습에 쓰지 않도록 지정할 수 있다.</p><p>이는 유럽 GDPR, 미국 주별 프라이버시법 등에서 요구하는 목적제한·데이터 최소화 원칙에 부합하는 방향이다.</p><p>특히 기업 고객 입장에서는 고객 데이터, 내부 코드, 기밀 문서 등이 무단으로 학습에 포함되는 리스크를 줄일 수 있다.</p><p>다만 구글이 집계·익명화된 메타데이터 수준에서 어느 정도까지 활용할지는 세부 약관을 통해 계속 주시할 필요가 있다.</p><p>금융기관은 이를 벤치마크 삼아, 사내 챗봇·코파일럿에 대해 ‘개인 데이터 학습 제외’, ‘민감 데이터 자동 마스킹’ 등 세분화된 동의체계를 설계해야 한다.</p><p>나아가 고객에게도 AI 기반 금융 상담 시 어떤 데이터가 학습에 쓰이는지, 옵트아웃시 어떤 기능이 제한되는지 투명하게 고지하는 것이 신뢰 형성에 중요해진다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 금융권이 자체·외부 LLM을 쓸 때도 ‘사용 로그 보존 vs 학습 활용’ 옵션을 분리해 설계해야, 규제 기관에 설명 가능한 데이터 거버넌스를 갖출 수 있다.</div>
+      </article>
+      <article class="ko-entry" id="policy-2">
+        <div class="ko-entry-head"><span class="source-chip">The Verge</span><span class="date-chip near">2026-11-22</span><a class="ko-orig" href="https://www.theverge.com/tech/1039554/un-regulations-killer-robots" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+        <h3 class="ko-title">유엔, ‘킬러 로봇’ 규제 합의 또 실패… 논의만 계속하기로</h3>
+        <div class="ko-body"><p>제네바 회의의 목표는 자율무기가 언제·어떻게 인간의 통제를 유지해야 하는지에 대한 최소한의 국제 기준을 마련하는 것이었다.</p><p>그러나 NPR 보도 등에 따르면, 회의는 대부분 절차·용어 정리에 머물며 실질 진전 없이 끝났다.</p><p>완전 금지·부분 제한·투명성 강화 등 다양한 제안이 나왔으나, 군사 기술 우위를 가진 국가들은 구속력 있는 조항에 부정적이었다.</p><p>그 결과, 유엔은 단지 ‘규범 옵션을 추가 논의한다’는 비구속적 합의만 남겼다.</p><p>이로 인해 AI 기반 드론, 자동 표적 식별·교전 시스템 등은 국가별 내부 규칙에 따라 개발이 이어질 전망이다.</p><p>민간 영역에서는 이런 군사용 AI 논란이 전체 AI 기술에 대한 사회적 신뢰를 저해하고, 규제 리스크 프리미엄을 키울 수 있다.</p><p>금융권 입장에서는 신용평가·사기탐지·리스크 모델 같은 ‘고위험’ 영역에서 국제 공통 규범을 기다리기보다, 자율적으로 투명성·인간 개입·감사 가능성을 보장하는 내부 정책을 선제적으로 갖추는 것이 중요하다.</p></div>
+        <div class="card-insight"><strong>💡 테크핀 연관:</strong> 군사 영역 규범 부재는 민간 AI에도 ‘고위험 사용’에 대한 자율 규제·리스크 관리 부담을 전가하므로, 금융·핀테크도 자체 AI 윤리·리스크 프레임워크를 강화해야 한다.</div>
+      </article>
+    </section>
+
+  <footer class="page-footer">
+    한글 상세본 · 자체 작성 · 2026-11-22 · <a href="/ai/archive/2026-11-22.html">카드 요약본</a> · <a href="/ai/">최신 AI 다이제스트</a> · <a href="/">경쟁사 동향</a>
+  </footer>
+
+</div>
+</body>
+</html>
